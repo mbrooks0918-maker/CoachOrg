@@ -411,3 +411,9 @@ enabled = true
 # declarative_schema_path = "./schemas"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+[functions.send-scheduled-notifications]
+# Invoked by a scheduler with the service role key (or CRON_SECRET), not by a
+# logged-in user, so there is no user JWT to verify. The function does its own
+# authorization check before touching the queue.
+verify_jwt = false

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { CODE_TYPES } from '../lib/codes'
 import { CodeTile } from '../components/ui'
+import { NotificationToggle } from '../components/NotificationToggle'
 
 type Program = { id: string; name: string; sport: string }
 type Code = { id: string; code: string; code_type: string }
@@ -114,6 +115,10 @@ export default function ProgramDashboard() {
         <h1 className="mt-3 font-display text-4xl font-bold uppercase tracking-tight text-ink sm:text-5xl">
           {program.name}
         </h1>
+
+        <div className="mt-10">
+          <NotificationToggle />
+        </div>
 
         {/* ---------------- Join codes (head coach / AD only) ---------------- */}
         {codes.length > 0 && (
