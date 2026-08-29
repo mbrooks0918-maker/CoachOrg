@@ -1,67 +1,56 @@
-function App() {
-  return (
-    <main className="min-h-svh">
-      {/* ---------- Hero ---------- */}
-      <section className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
-        {/* soft red wash behind the headline */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/3 -z-10 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[120px]"
-        />
+import type { ReactNode } from 'react'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { useAuth } from './auth/AuthProvider'
+import Home from './pages/Home'
+import SignUp from './pages/SignUp'
+import Login from './pages/Login'
+import CreateOrg from './pages/CreateOrg'
+import ProgramDashboard from './pages/ProgramDashboard'
 
-        <p className="font-body text-xs font-medium uppercase tracking-[0.3em] text-muted">
-          CoachOrg
-        </p>
+/**
+ * Waits for the initial session check before deciding. Without the `loading`
+ * gate a signed-in user gets bounced to /login on every hard refresh, because
+ * the session is restored asynchronously.
+ */
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { session, loading } = useAuth()
 
-        <h1 className="mt-6 max-w-4xl font-display text-5xl font-bold leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-7xl">
-          Run your team. Skip the chaos.
-        </h1>
+  if (loading) {
+    return (
+      <main className="flex min-h-svh items-center justify-center px-6">
+        <p className="font-body text-muted">Loading…</p>
+      </main>
+    )
+  }
 
-        <p className="mt-6 max-w-xl font-body text-lg leading-relaxed text-muted sm:text-xl">
-          Roster, messages, equipment, and game day — one simple app for coaches.
-        </p>
+  if (!session) return <Navigate to="/login" replace />
 
-        <div className="mt-10 flex w-full max-w-md flex-col gap-4 sm:w-auto sm:flex-row">
-          <a
-            href="#"
-            className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-3.5 font-body text-base font-semibold text-ink transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-          >
-            Create a Team
-          </a>
-          <a
-            href="#join-code"
-            className="inline-flex items-center justify-center rounded-lg border-2 border-accent bg-transparent px-8 py-3.5 font-body text-base font-semibold text-ink transition hover:bg-accent/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-          >
-            Join with a Code
-          </a>
-        </div>
-      </section>
-
-      {/* ---------- Join-code scoreboard tile ---------- */}
-      <section
-        id="join-code"
-        className="border-t border-border px-6 py-20 sm:py-24"
-      >
-        <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-          <h2 className="font-display text-2xl font-semibold uppercase tracking-wide text-ink sm:text-3xl">
-            Every team gets a code
-          </h2>
-          <p className="mt-3 font-body text-base text-muted">
-            Share it once. Players and parents join in seconds — no invites to chase.
-          </p>
-
-          <div className="mt-10 w-full rounded-xl border-2 border-accent bg-surface px-6 py-8 shadow-[0_0_60px_-20px] shadow-accent sm:px-10">
-            <p className="font-body text-[0.7rem] font-medium uppercase tracking-[0.35em] text-muted">
-              Team Code
-            </p>
-            <p className="mt-4 font-mono text-3xl font-bold tracking-[0.08em] text-accent sm:text-4xl">
-              ALB-AGGIES-24
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
-  )
+  return <>{children}</>
 }
 
-export default App
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/create-org"
+        element={
+          <RequireAuth>
+            <CreateOrg />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/program/:programId"
+        element={
+          <RequireAuth>
+            <ProgramDashboard />
+          </RequireAuth>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
