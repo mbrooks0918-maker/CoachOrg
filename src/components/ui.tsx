@@ -1,4 +1,9 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  TextareaHTMLAttributes,
+} from 'react'
 
 /** Centred single-column shell used by every form page. */
 export function FormShell({
@@ -46,6 +51,30 @@ export function Field({ label, hint, id, ...props }: FieldProps) {
         id={inputId}
         {...props}
         className="mt-2 w-full rounded-lg border border-border bg-surface px-4 py-3 font-body text-base text-ink placeholder:text-muted/60 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+      />
+      {hint && <span className="mt-1.5 block font-body text-xs text-muted">{hint}</span>}
+    </label>
+  )
+}
+
+type TextAreaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  label: string
+  hint?: string
+}
+
+/** Field's multi-line twin, sharing its border, focus ring and label style. */
+export function TextArea({ label, hint, id, rows = 3, ...props }: TextAreaProps) {
+  const inputId = id ?? props.name
+  return (
+    <label htmlFor={inputId} className="block">
+      <span className="font-body text-xs font-medium uppercase tracking-[0.18em] text-muted">
+        {label}
+      </span>
+      <textarea
+        id={inputId}
+        rows={rows}
+        {...props}
+        className="mt-2 w-full resize-y rounded-lg border border-border bg-surface px-4 py-3 font-body text-base text-ink placeholder:text-muted/60 transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
       />
       {hint && <span className="mt-1.5 block font-body text-xs text-muted">{hint}</span>}
     </label>

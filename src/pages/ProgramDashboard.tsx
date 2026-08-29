@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabaseClient'
 import { CODE_TYPES } from '../lib/codes'
 import { CodeTile } from '../components/ui'
 import { NotificationToggle } from '../components/NotificationToggle'
+import { Reminders } from '../components/Reminders'
+import { canSchedule } from '../lib/reminders'
 
 type Program = { id: string; name: string; sport: string }
 type Code = { id: string; code: string; code_type: string }
@@ -35,6 +37,7 @@ export default function ProgramDashboard() {
   const [program, setProgram] = useState<Program | null>(null)
   const [codes, setCodes] = useState<Code[]>([])
   const [members, setMembers] = useState<Member[]>([])
+  const [role, setRole] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -43,7 +46,7 @@ export default function ProgramDashboard() {
     let active = true
 
     ;(async () => {
-      const [programResult, codesResult, membersResult] = await Promise.all([
+      const [programResult, codesResult, membersResult, roleResult] = await Promise.all([
         supabase.from('programs').select('id, name, sport').eq('id', programId).single(),
         supabase.from('program_codes').select('id, code, code_type').eq('program_id', programId),
         supabase
@@ -51,6 +54,9 @@ export default function ProgramDashboard() {
           .select('id, display_name, role, phone_number')
           .eq('program_id', programId)
           .order('display_name'),
+        // Authoritative role for the signed-in user, straight from the same
+        // helper the row-level policies use.
+        supabase.rpc('program_role', { p_program_id: programId }),
       ])
 
       if (!active) return
@@ -62,6 +68,7 @@ export default function ProgramDashboard() {
       // than an error, so an assistant or parent simply sees no code section.
       if (codesResult.data) setCodes(codesResult.data)
       if (membersResult.data) setMembers(membersResult.data)
+      if (roleResult.data) setRole(roleResult.data as string)
 
       setLoading(false)
     })()
@@ -119,6 +126,9 @@ export default function ProgramDashboard() {
         <div className="mt-10">
           <NotificationToggle />
         </div>
+
+        {/* ------- Reminders (head coach, assistants, managers only) -------- */}
+        {canSchedule(role) && <Reminders programId={program.id} />}
 
         {/* ---------------- Join codes (head coach / AD only) ---------------- */}
         {codes.length > 0 && (
