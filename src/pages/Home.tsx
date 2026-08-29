@@ -37,6 +37,16 @@ export default function Home() {
             Join with a Code
           </Link>
         </div>
+
+        <p className="mt-8 font-body text-sm text-muted">
+          Already have an account?{' '}
+          <Link
+            to="/login"
+            className="font-semibold text-accent underline underline-offset-4 transition hover:brightness-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+          >
+            Log In
+          </Link>
+        </p>
       </section>
 
       {/* ---------- Join-code scoreboard tile ---------- */}
