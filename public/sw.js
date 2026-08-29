@@ -25,8 +25,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'CoachOrg'
   const options = {
     body: payload.body || '',
-    icon: payload.icon || '/favicon.svg',
-    badge: payload.badge || '/favicon.svg',
+    icon: payload.icon || '/icon-192.png',
+    badge: payload.badge || '/badge-96.png',
     // Collapses repeats of the same task instead of stacking duplicates.
     tag: payload.tag || 'coachorg',
     renotify: Boolean(payload.tag),

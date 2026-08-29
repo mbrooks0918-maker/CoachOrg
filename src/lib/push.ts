@@ -3,6 +3,7 @@ import { supabase } from './supabaseClient'
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY
 
 export type PushState =
+  | 'needs-install' // iOS: push only exists once the app is on the Home Screen
   | 'unsupported' // no service worker or no Push API
   | 'insecure' // needs https (localhost counts as secure)
   | 'denied' // user blocked notifications in the browser
@@ -21,6 +22,27 @@ function urlBase64ToUint8Array(base64UrlString: string): Uint8Array {
   const output = new Uint8Array(raw.length)
   for (let i = 0; i < raw.length; i++) output[i] = raw.charCodeAt(i)
   return output
+}
+
+/**
+ * True on iPhone and iPad, including iPadOS, which reports itself as a Mac and
+ * is only given away by the touch points.
+ */
+export function isIOS(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+}
+
+/** True when running from the Home Screen rather than inside a browser tab. */
+export function isStandalone(): boolean {
+  if (typeof window === 'undefined') return false
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  )
 }
 
 export function pushSupported(): boolean {
@@ -45,7 +67,12 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 }
 
 export async function getPushState(): Promise<PushState> {
-  if (!pushSupported()) return 'unsupported'
+  // Safari on iOS hides the Notification and Push APIs entirely until the site
+  // is added to the Home Screen. Reporting that as 'unsupported' sent people
+  // looking for a browser setting that does not exist.
+  if (!pushSupported()) {
+    return isIOS() && !isStandalone() ? 'needs-install' : 'unsupported'
+  }
   // Push requires a secure context. localhost is treated as secure.
   if (!window.isSecureContext) return 'insecure'
   if (Notification.permission === 'denied') return 'denied'
@@ -67,7 +94,13 @@ export async function getPushState(): Promise<PushState> {
  */
 export async function enablePush(): Promise<{ ok: boolean; message: string }> {
   if (!pushSupported()) {
-    return { ok: false, message: 'This browser does not support web push.' }
+    return {
+      ok: false,
+      message:
+        isIOS() && !isStandalone()
+          ? 'On iPhone, add CoachOrg to your Home Screen first, then turn notifications on from there.'
+          : 'This browser does not support web push.',
+    }
   }
   if (!window.isSecureContext) {
     return { ok: false, message: 'Notifications need a secure (https) connection.' }

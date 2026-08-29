@@ -35,6 +35,36 @@ export function NotificationToggle() {
 
   if (state === null) return null
 
+  // iPhones need the app on the Home Screen before the notification APIs even
+  // exist, so this case gets instructions instead of a message.
+  if (state === 'needs-install') {
+    return (
+      <div className="rounded-xl border border-border bg-surface px-5 py-5">
+        <h3 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
+          Turn on notifications
+        </h3>
+        <p className="mt-1 font-body text-sm text-muted">
+          On iPhone and iPad, add CoachOrg to your Home Screen first. Notifications only
+          work from there.
+        </p>
+        <ol className="mt-4 space-y-2 font-body text-sm text-ink">
+          <li>
+            <span className="font-semibold text-accent">1.</span> Tap the Share button at the
+            bottom of Safari (the square with an arrow pointing up).
+          </li>
+          <li>
+            <span className="font-semibold text-accent">2.</span> Scroll down and tap{' '}
+            <span className="font-semibold">Add to Home Screen</span>.
+          </li>
+          <li>
+            <span className="font-semibold text-accent">3.</span> Open CoachOrg from your Home
+            Screen and come back to this page.
+          </li>
+        </ol>
+      </div>
+    )
+  }
+
   // Explain rather than showing a button that cannot work.
   const blocked: Partial<Record<PushState, string>> = {
     unsupported: 'This browser does not support push notifications.',
