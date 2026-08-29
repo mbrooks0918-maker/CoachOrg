@@ -1,8 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../auth/AuthProvider'
 import { buildCode, CODE_TYPES, orgPrefix } from '../lib/codes'
+import { findPrimaryProgramId } from '../lib/program'
 import { Button, ErrorNote, Field, FormShell } from '../components/ui'
 
 const MAX_CODE_ATTEMPTS = 5
@@ -15,6 +16,27 @@ export default function CreateOrg() {
   const [sport, setSport] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [checking, setChecking] = useState(true)
+
+  // Someone who already has a program should never see this form -- filling it
+  // in again would create a second organization and program alongside the
+  // first, with a fresh set of join codes.
+  useEffect(() => {
+    const userId = session?.user.id
+    if (!userId) {
+      setChecking(false)
+      return
+    }
+    let active = true
+    findPrimaryProgramId(userId).then((programId) => {
+      if (!active) return
+      if (programId) navigate(`/program/${programId}`, { replace: true })
+      else setChecking(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [session, navigate])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -110,6 +132,14 @@ export default function CreateOrg() {
 
     setBusy(false)
     navigate(`/program/${program.id}`, { replace: true })
+  }
+
+  if (checking) {
+    return (
+      <main className="flex min-h-svh items-center justify-center px-6">
+        <p className="font-body text-muted">Loading…</p>
+      </main>
+    )
   }
 
   return (

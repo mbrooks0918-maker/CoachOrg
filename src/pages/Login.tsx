@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { findPrimaryProgramId } from '../lib/program'
 import { Button, ErrorNote, Field, FormShell } from '../components/ui'
 
 export default function Login() {
@@ -15,18 +16,22 @@ export default function Login() {
     setError('')
     setBusy(true)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-    setBusy(false)
 
     if (signInError) {
+      setBusy(false)
       setError(signInError.message)
       return
     }
 
-    navigate('/create-org', { replace: true })
+    // Returning users belong to a program already; only someone with none
+    // should ever see the setup form.
+    const programId = data.user ? await findPrimaryProgramId(data.user.id) : null
+    setBusy(false)
+    navigate(programId ? `/program/${programId}` : '/create-org', { replace: true })
   }
 
   return (
