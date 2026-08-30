@@ -143,6 +143,48 @@ export async function createEvent(input: {
   return { ok: true, message: 'Event created.', event: data as EventRow }
 }
 
+/**
+ * Edits an event's own fields.
+ *
+ * Deliberately a plain update of the events row. The to-do list, equipment
+ * list, volunteer assignments and tick marks live in their own tables keyed by
+ * event_id, so changing a kickoff time or an opponent cannot disturb them.
+ */
+export async function updateEvent(
+  eventId: string,
+  input: {
+    name: string
+    startsAtLocal: string
+    location: string
+    opponent: string
+    notes: string
+  },
+): Promise<{ ok: boolean; message: string; event?: EventRow }> {
+  const name = input.name.trim()
+  if (!name) return { ok: false, message: 'Give the event a name.' }
+
+  const startsAt = new Date(input.startsAtLocal)
+  if (Number.isNaN(startsAt.getTime())) return { ok: false, message: 'Pick a date and time.' }
+
+  const { data, error } = await supabase
+    .from('events')
+    .update({
+      name,
+      starts_at: startsAt.toISOString(),
+      location: input.location.trim() || null,
+      opponent: input.opponent.trim() || null,
+      notes: input.notes.trim() || null,
+    })
+    .eq('id', eventId)
+    .select('id, program_id, name, starts_at, location, opponent, notes')
+
+  if (error) return { ok: false, message: error.message }
+  if (!data || data.length === 0) {
+    return { ok: false, message: 'Only a coach can edit this event.' }
+  }
+  return { ok: true, message: 'Event updated.', event: data[0] as EventRow }
+}
+
 export async function deleteEvent(eventId: string): Promise<{ ok: boolean; message: string }> {
   const { error, count } = await supabase
     .from('events')

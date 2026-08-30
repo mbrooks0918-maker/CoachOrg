@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, ErrorNote, Field, TextArea } from '../components/ui'
+import { Button, ErrorNote } from '../components/ui'
+import { EventFields, type EventFormValues } from '../components/EventForm'
 import { useProgram } from '../lib/programContext'
 import { isStaff } from '../lib/roster'
 import {
@@ -142,13 +143,18 @@ function NewEventForm({
   onCreated: (event: EventRow) => void
 }) {
   const [open, setOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [startsAt, setStartsAt] = useState(defaultKickoff)
-  const [location, setLocation] = useState('')
-  const [opponent, setOpponent] = useState('')
-  const [notes, setNotes] = useState('')
+  const [values, setValues] = useState<EventFormValues>(() => ({
+    name: '',
+    startsAt: defaultKickoff(),
+    opponent: '',
+    location: '',
+    notes: '',
+  }))
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+
+  const patch = (next: Partial<EventFormValues>) =>
+    setValues((current) => ({ ...current, ...next }))
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
@@ -156,11 +162,11 @@ function NewEventForm({
     setError('')
     const result = await createEvent({
       programId,
-      name,
-      startsAtLocal: startsAt,
-      location,
-      opponent,
-      notes,
+      name: values.name,
+      startsAtLocal: values.startsAt,
+      location: values.location,
+      opponent: values.opponent,
+      notes: values.notes,
     })
     setBusy(false)
     if (!result.ok || !result.event) {
@@ -168,11 +174,13 @@ function NewEventForm({
       return
     }
     onCreated(result.event)
-    setName('')
-    setLocation('')
-    setOpponent('')
-    setNotes('')
-    setStartsAt(defaultKickoff())
+    setValues({
+      name: '',
+      startsAt: defaultKickoff(),
+      opponent: '',
+      location: '',
+      notes: '',
+    })
     setOpen(false)
   }
 
@@ -203,11 +211,7 @@ function NewEventForm({
         </button>
       </div>
 
-      <Field label="Name" name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Week 3 — Home" maxLength={80} required />
-      <Field label="Date and time" name="startsAt" type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required />
-      <Field label="Opponent" name="opponent" value={opponent} onChange={(e) => setOpponent(e.target.value)} placeholder="Optional" maxLength={60} />
-      <Field label="Location" name="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Aggie Stadium" maxLength={80} />
-      <TextArea label="Notes" name="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional. Anything the team should know." maxLength={400} />
+      <EventFields values={values} onChange={patch} />
 
       <ErrorNote>{error}</ErrorNote>
 

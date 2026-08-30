@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, Outlet, useParams } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
 
@@ -48,6 +48,13 @@ const GameDayIcon = () => (
   </svg>
 )
 
+const SignOutIcon = () => (
+  <svg {...iconProps}>
+    <path d="M15 17v1.5A1.5 1.5 0 0 1 13.5 20h-7A1.5 1.5 0 0 1 5 18.5v-13A1.5 1.5 0 0 1 6.5 4h7A1.5 1.5 0 0 1 15 5.5V7" />
+    <path d="M18.5 12H10m0 0 2.75-2.75M10 12l2.75 2.75" />
+  </svg>
+)
+
 const NAV = [
   { to: 'roster', label: 'Roster & Comms', short: 'Roster', Icon: RosterIcon },
   { to: 'tasks', label: 'Scheduled Tasks', short: 'Tasks', Icon: TasksIcon },
@@ -59,6 +66,7 @@ const NAV = [
 
 export default function AppShell() {
   const { programId } = useParams<{ programId: string }>()
+  const navigate = useNavigate()
   const [program, setProgram] = useState<Program | null>(null)
   const [role, setRole] = useState<string | null>(null)
   const [memberId, setMemberId] = useState<string | null>(null)
@@ -101,6 +109,14 @@ export default function AppShell() {
     }
   }, [programId])
 
+  // AuthProvider is subscribed to auth state, so clearing the session is
+  // enough to make RequireAuth bounce to /login; the navigate just gets there
+  // without a flash of the program screen.
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    navigate('/login', { replace: true })
+  }
+
   if (loading) return <Centered>Loading…</Centered>
   if (error || !program) {
     return (
@@ -140,18 +156,39 @@ export default function AppShell() {
               </NavLink>
             ))}
           </nav>
+
+          <div className="border-t border-border px-3 py-4">
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-body text-sm font-medium text-muted transition hover:bg-accent/10 hover:text-ink"
+            >
+              <SignOutIcon />
+              <span>Sign out</span>
+            </button>
+          </div>
         </aside>
 
         {/* ---- Content ---- */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile header: the sidebar carries this on desktop. */}
-          <header className="border-b border-border px-6 py-5 lg:hidden">
-            <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
-              {program.sport}
-            </p>
-            <h1 className="mt-1.5 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
-              {program.name}
-            </h1>
+          <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-5 lg:hidden">
+            <div className="min-w-0">
+              <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
+                {program.sport}
+              </p>
+              <h1 className="mt-1.5 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
+                {program.name}
+              </h1>
+            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              className="mt-1 shrink-0 rounded-full border border-border px-3 py-1.5 font-body text-xs uppercase tracking-wider text-muted transition hover:border-accent hover:text-ink"
+            >
+              Sign out
+            </button>
           </header>
 
           {/* pb leaves room for the tab bar, which is fixed over the page. */}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { EventChecklist } from '../components/EventChecklist'
+import { EventFields, type EventFormValues } from '../components/EventForm'
 import { MemberPicker } from '../components/MemberPicker'
 import { Button, ErrorNote } from '../components/ui'
 import { useProgram } from '../lib/programContext'
@@ -12,6 +13,8 @@ import {
   getEvent,
   loadEventDetail,
   removeVolunteer,
+  toLocalInputValue,
+  updateEvent,
   type EventRow,
   type ListItem,
   type Volunteer,
@@ -30,6 +33,7 @@ export default function EventDetailPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [editing, setEditing] = useState(false)
 
   useEffect(() => {
     if (!eventId) return
@@ -82,22 +86,46 @@ export default function EventDetailPage() {
     <div>
       <BackLink />
 
-      <h2 className="mt-4 font-display text-3xl font-bold uppercase tracking-tight text-ink">
-        {event.name}
-      </h2>
-      <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-accent">
-        {formatEventTime(event.starts_at)}
-      </p>
+      {editing ? (
+        <EditEventForm
+          event={event}
+          onCancel={() => setEditing(false)}
+          onSaved={(updated) => {
+            setEvent(updated)
+            setEditing(false)
+          }}
+        />
+      ) : (
+        <>
+          <div className="mt-4 flex items-start justify-between gap-4">
+            <h2 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
+              {event.name}
+            </h2>
+            {staff && (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="mt-1 shrink-0 rounded-full border border-border px-3 py-1.5 font-body text-xs uppercase tracking-wider text-muted transition hover:border-accent hover:text-ink"
+              >
+                Edit
+              </button>
+            )}
+          </div>
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-accent">
+            {formatEventTime(event.starts_at)}
+          </p>
 
-      <div className="mt-3 space-y-1 font-body text-sm text-muted">
-        {event.opponent && <p>vs {event.opponent}</p>}
-        {event.location && <p>{event.location}</p>}
-      </div>
+          <div className="mt-3 space-y-1 font-body text-sm text-muted">
+            {event.opponent && <p>vs {event.opponent}</p>}
+            {event.location && <p>{event.location}</p>}
+          </div>
 
-      {event.notes && (
-        <p className="mt-4 rounded-xl border border-border bg-surface px-4 py-3 font-body text-sm text-ink">
-          {event.notes}
-        </p>
+          {event.notes && (
+            <p className="mt-4 rounded-xl border border-border bg-surface px-4 py-3 font-body text-sm text-ink">
+              {event.notes}
+            </p>
+          )}
+        </>
       )}
 
       {/* Your own jobs first -- it is the one thing a parent opens this for. */}
@@ -169,6 +197,86 @@ export default function EventDetailPage() {
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * Edits the event's own fields only.
+ *
+ * The lists, volunteers and tick marks are keyed by event_id in their own
+ * tables and are never mentioned here, so saving cannot disturb them.
+ */
+function EditEventForm({
+  event,
+  onCancel,
+  onSaved,
+}: {
+  event: EventRow
+  onCancel: () => void
+  onSaved: (event: EventRow) => void
+}) {
+  const [values, setValues] = useState<EventFormValues>(() => ({
+    name: event.name,
+    startsAt: toLocalInputValue(new Date(event.starts_at)),
+    opponent: event.opponent ?? '',
+    location: event.location ?? '',
+    notes: event.notes ?? '',
+  }))
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  const patch = (next: Partial<EventFormValues>) =>
+    setValues((current) => ({ ...current, ...next }))
+
+  async function handleSubmit(formEvent: React.FormEvent) {
+    formEvent.preventDefault()
+    setBusy(true)
+    setError('')
+    const result = await updateEvent(event.id, {
+      name: values.name,
+      startsAtLocal: values.startsAt,
+      location: values.location,
+      opponent: values.opponent,
+      notes: values.notes,
+    })
+    setBusy(false)
+    if (!result.ok || !result.event) {
+      setError(result.message)
+      return
+    }
+    onSaved(result.event)
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="mt-4 space-y-5 rounded-xl border border-border bg-surface px-5 py-6"
+    >
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
+          Edit event
+        </h2>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="font-body text-xs uppercase tracking-wider text-muted transition hover:text-ink"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <EventFields values={values} onChange={patch} idPrefix="edit-" />
+
+      <p className="font-body text-xs text-muted">
+        The to-do list, kit list and volunteer jobs are not affected.
+      </p>
+
+      <ErrorNote>{error}</ErrorNote>
+
+      <Button type="submit" disabled={busy}>
+        {busy ? 'Saving…' : 'Save Changes'}
+      </Button>
+    </form>
   )
 }
 
