@@ -61,6 +61,8 @@ export default function AppShell() {
   const { programId } = useParams<{ programId: string }>()
   const [program, setProgram] = useState<Program | null>(null)
   const [role, setRole] = useState<string | null>(null)
+  const [memberId, setMemberId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -69,15 +71,28 @@ export default function AppShell() {
     let active = true
 
     ;(async () => {
-      const [programResult, roleResult] = await Promise.all([
+      const { data: userData } = await supabase.auth.getUser()
+      const uid = userData.user?.id ?? null
+
+      const [programResult, roleResult, memberResult] = await Promise.all([
         supabase.from('programs').select('id, name, sport').eq('id', programId).single(),
         supabase.rpc('program_role', { p_program_id: programId }),
+        uid
+          ? supabase
+              .from('program_members')
+              .select('id')
+              .eq('program_id', programId)
+              .eq('user_id', uid)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ])
       if (!active) return
 
       if (programResult.error) setError(programResult.error.message)
       else setProgram(programResult.data)
       if (roleResult.data) setRole(roleResult.data as string)
+      setUserId(uid)
+      setMemberId(memberResult.data?.id ?? null)
       setLoading(false)
     })()
 
@@ -101,7 +116,7 @@ export default function AppShell() {
   }
 
   return (
-    <ProgramContext value={{ program, role }}>
+    <ProgramContext value={{ program, role, memberId, userId }}>
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">

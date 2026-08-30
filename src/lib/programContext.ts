@@ -6,6 +6,10 @@ export type ProgramContextValue = {
   program: Program
   /** The signed-in user's role in this program; null for an org admin. */
   role: string | null
+  /** The viewer's own program_members.id; null for an org admin. */
+  memberId: string | null
+  /** The viewer's auth user id. */
+  userId: string | null
 }
 
 /**

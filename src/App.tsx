@@ -10,6 +10,8 @@ import AppShell from './components/AppShell'
 import RosterPage from './pages/RosterPage'
 import TasksPage from './pages/TasksPage'
 import ComingSoon from './pages/ComingSoon'
+import GameDayPage from './pages/GameDayPage'
+import EventDetailPage from './pages/EventDetailPage'
 
 /**
  * Waits for the initial session check before deciding. Without the `loading`
@@ -83,21 +85,8 @@ export default function App() {
             />
           }
         />
-        <Route
-          path="game-day"
-          element={
-            <ComingSoon
-              title="Game-Day Ops"
-              tagline="The running order for a game day: who is travelling, what time the bus leaves, and who still has not checked in."
-              bullets={[
-                'A travel roster with availability for each game',
-                'Departure and arrival times pushed to families',
-                'Check players in as they arrive',
-                'Share the day\u2019s plan without a group text',
-              ]}
-            />
-          }
-        />
+        <Route path="game-day" element={<GameDayPage />} />
+        <Route path="game-day/:eventId" element={<EventDetailPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
