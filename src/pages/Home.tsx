@@ -1,6 +1,53 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
+import { useAuth } from '../auth/AuthProvider'
+import { findPrimaryProgramId } from '../lib/program'
 
+/**
+ * The marketing page, but only for people who are not signed in.
+ *
+ * This is the app's start_url, so it is what the Home Screen icon opens. A
+ * signed-in coach landing on "Create a Team / Log In" reads as being logged
+ * out and sends them to type their password again, even though the session was
+ * there the whole time. Anyone with a session is forwarded to their program --
+ * the same decision the login screen makes.
+ */
 export default function Home() {
+  const { session, loading } = useAuth()
+  const [destination, setDestination] = useState<string | null>(null)
+  const [checked, setChecked] = useState(false)
+
+  useEffect(() => {
+    if (loading) return
+
+    let active = true
+    ;(async () => {
+      // Always awaits, so neither state update lands synchronously inside the
+      // effect and starts a second render pass.
+      const programId = await (session
+        ? findPrimaryProgramId(session.user.id)
+        : Promise.resolve(null))
+      if (!active) return
+      if (session) setDestination(programId ? `/program/${programId}` : '/create-org')
+      setChecked(true)
+    })()
+    return () => {
+      active = false
+    }
+  }, [session, loading])
+
+  // Held back rather than shown and yanked away, which would flash the sales
+  // pitch at someone who is already a member.
+  if (loading || !checked) {
+    return (
+      <main className="flex min-h-svh items-center justify-center px-6">
+        <p className="font-body text-muted">Loading…</p>
+      </main>
+    )
+  }
+
+  if (destination) return <Navigate to={destination} replace />
+
   return (
     <main className="min-h-svh">
       {/* ---------- Hero ---------- */}
