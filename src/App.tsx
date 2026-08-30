@@ -12,6 +12,7 @@ import RosterPage from './pages/RosterPage'
 import TasksPage from './pages/TasksPage'
 import GameDayPage from './pages/GameDayPage'
 import EquipmentPage from './pages/EquipmentPage'
+import ProgramHome from './pages/ProgramHome'
 import EventDetailPage from './pages/EventDetailPage'
 
 /**
@@ -70,7 +71,9 @@ export default function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<Navigate to="roster" replace />} />
+        {/* Landing screen after login. The four sections keep their own
+            routes, so existing deep links are untouched. */}
+        <Route index element={<ProgramHome />} />
         <Route path="roster" element={<RosterPage />} />
         <Route path="tasks" element={<TasksPage />} />
         <Route path="equipment" element={<EquipmentPage />} />

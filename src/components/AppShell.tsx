@@ -1,66 +1,26 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
+import { NAV } from '../lib/navSections'
 
-// ----------------------------------------------------------------- icons ----
-// Inline so the app keeps no icon dependency. All four share a 24px box and
-// inherit colour from the nav item, which is what drives the active state.
-
-const iconProps = {
-  width: 22,
-  height: 22,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  strokeWidth: 1.75,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
-  'aria-hidden': true,
-}
-
-const RosterIcon = () => (
-  <svg {...iconProps}>
-    <path d="M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19" />
-    <circle cx="10" cy="8" r="3.25" />
-    <path d="M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.38M15.6 5.2a3.25 3.25 0 0 1 0 5.6" />
-  </svg>
-)
-
-const TasksIcon = () => (
-  <svg {...iconProps}>
-    <path d="M18 9a6 6 0 1 0-12 0c0 4.5-1.75 5.75-1.75 5.75h15.5S18 13.5 18 9Z" />
-    <path d="M10.4 18.5a2 2 0 0 0 3.2 0" />
-  </svg>
-)
-
-const EquipmentIcon = () => (
-  <svg {...iconProps}>
-    <path d="M3.5 8.5 12 4l8.5 4.5v7L12 20l-8.5-4.5v-7Z" />
-    <path d="M3.5 8.5 12 13l8.5-4.5M12 13v7" />
-  </svg>
-)
-
-const GameDayIcon = () => (
-  <svg {...iconProps}>
-    <path d="M5 21V4" />
-    <path d="M5 5h11.5l-1.75 3.25L16.5 11.5H5" />
-  </svg>
-)
-
+/** Belongs to the shell rather than the section list -- it is not a section. */
 const SignOutIcon = () => (
-  <svg {...iconProps}>
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.75}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
     <path d="M15 17v1.5A1.5 1.5 0 0 1 13.5 20h-7A1.5 1.5 0 0 1 5 18.5v-13A1.5 1.5 0 0 1 6.5 4h7A1.5 1.5 0 0 1 15 5.5V7" />
     <path d="M18.5 12H10m0 0 2.75-2.75M10 12l2.75 2.75" />
   </svg>
 )
-
-const NAV = [
-  { to: 'roster', label: 'Roster & Comms', short: 'Roster', Icon: RosterIcon },
-  { to: 'tasks', label: 'Scheduled Tasks', short: 'Tasks', Icon: TasksIcon },
-  { to: 'equipment', label: 'Equipment', short: 'Gear', Icon: EquipmentIcon },
-  { to: 'game-day', label: 'Game-Day Ops', short: 'Game Day', Icon: GameDayIcon },
-]
 
 // ----------------------------------------------------------------- shell ----
 
@@ -136,7 +96,10 @@ export default function AppShell() {
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
-          <div className="border-b border-border px-6 py-6">
+          <Link
+            to=""
+            className="block border-b border-border px-6 py-6 transition hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+          >
             <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
               CoachOrg
             </p>
@@ -146,7 +109,7 @@ export default function AppShell() {
             <p className="mt-1 font-body text-xs uppercase tracking-wider text-muted">
               {program.sport}
             </p>
-          </div>
+          </Link>
 
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
             {NAV.map(({ to, label, Icon }) => (
@@ -173,14 +136,14 @@ export default function AppShell() {
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile header: the sidebar carries this on desktop. */}
           <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-5 lg:hidden">
-            <div className="min-w-0">
+            <Link to="" className="min-w-0 focus-visible:outline-none">
               <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
                 {program.sport}
               </p>
               <h1 className="mt-1.5 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
                 {program.name}
               </h1>
-            </div>
+            </Link>
             <button
               type="button"
               onClick={handleSignOut}
