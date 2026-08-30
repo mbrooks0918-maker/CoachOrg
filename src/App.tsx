@@ -5,7 +5,11 @@ import Home from './pages/Home'
 import SignUp from './pages/SignUp'
 import Login from './pages/Login'
 import CreateOrg from './pages/CreateOrg'
-import ProgramDashboard from './pages/ProgramDashboard'
+import JoinProgram from './pages/JoinProgram'
+import AppShell from './components/AppShell'
+import RosterPage from './pages/RosterPage'
+import TasksPage from './pages/TasksPage'
+import ComingSoon from './pages/ComingSoon'
 
 /**
  * Waits for the initial session check before deciding. Without the `loading`
@@ -43,13 +47,58 @@ export default function App() {
         }
       />
       <Route
-        path="/program/:programId"
+        path="/join"
         element={
           <RequireAuth>
-            <ProgramDashboard />
+            <JoinProgram />
           </RequireAuth>
         }
       />
+
+      {/* Everything inside a program shares the navigation shell, which loads
+          the program and the viewer's role once for all four sections. */}
+      <Route
+        path="/program/:programId"
+        element={
+          <RequireAuth>
+            <AppShell />
+          </RequireAuth>
+        }
+      >
+        <Route index element={<Navigate to="roster" replace />} />
+        <Route path="roster" element={<RosterPage />} />
+        <Route path="tasks" element={<TasksPage />} />
+        <Route
+          path="equipment"
+          element={
+            <ComingSoon
+              title="Equipment"
+              tagline="Check gear out to a player, see who still has what, and stop chasing helmets in August."
+              bullets={[
+                'Check items out to a player and back in again',
+                'See everything one player is holding, in one place',
+                'A list of what is still outstanding before the season ends',
+                'Flag damaged or missing gear without a spreadsheet',
+              ]}
+            />
+          }
+        />
+        <Route
+          path="game-day"
+          element={
+            <ComingSoon
+              title="Game-Day Ops"
+              tagline="The running order for a game day: who is travelling, what time the bus leaves, and who still has not checked in."
+              bullets={[
+                'A travel roster with availability for each game',
+                'Departure and arrival times pushed to families',
+                'Check players in as they arrive',
+                'Share the day\u2019s plan without a group text',
+              ]}
+            />
+          }
+        />
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

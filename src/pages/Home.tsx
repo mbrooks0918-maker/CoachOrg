@@ -31,7 +31,7 @@ export default function Home() {
             Create a Team
           </Link>
           <Link
-            to="/login"
+            to="/join"
             className="inline-flex items-center justify-center rounded-lg border-2 border-accent bg-transparent px-8 py-3.5 font-body text-base font-semibold text-ink transition hover:bg-accent/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
           >
             Join with a Code
