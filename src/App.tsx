@@ -6,11 +6,12 @@ import SignUp from './pages/SignUp'
 import Login from './pages/Login'
 import CreateOrg from './pages/CreateOrg'
 import JoinProgram from './pages/JoinProgram'
+import AuthCallback from './pages/AuthCallback'
 import AppShell from './components/AppShell'
 import RosterPage from './pages/RosterPage'
 import TasksPage from './pages/TasksPage'
-import ComingSoon from './pages/ComingSoon'
 import GameDayPage from './pages/GameDayPage'
+import EquipmentPage from './pages/EquipmentPage'
 import EventDetailPage from './pages/EventDetailPage'
 
 /**
@@ -40,6 +41,8 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
+      {/* Google returns here; the page then routes exactly as an email login does. */}
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route
         path="/create-org"
         element={
@@ -70,21 +73,7 @@ export default function App() {
         <Route index element={<Navigate to="roster" replace />} />
         <Route path="roster" element={<RosterPage />} />
         <Route path="tasks" element={<TasksPage />} />
-        <Route
-          path="equipment"
-          element={
-            <ComingSoon
-              title="Equipment"
-              tagline="Check gear out to a player, see who still has what, and stop chasing helmets in August."
-              bullets={[
-                'Check items out to a player and back in again',
-                'See everything one player is holding, in one place',
-                'A list of what is still outstanding before the season ends',
-                'Flag damaged or missing gear without a spreadsheet',
-              ]}
-            />
-          }
-        />
+        <Route path="equipment" element={<EquipmentPage />} />
         <Route path="game-day" element={<GameDayPage />} />
         <Route path="game-day/:eventId" element={<EventDetailPage />} />
       </Route>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { findPrimaryProgramId } from '../lib/program'
 import { Button, ErrorNote, Field, FormShell } from '../components/ui'
+import { AuthDivider, GoogleButton } from '../components/GoogleButton'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -47,7 +48,12 @@ export default function Login() {
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-5">
+        <GoogleButton label="Continue with Google" />
+        <AuthDivider />
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-5 space-y-5">
         <Field
           label="Email"
           name="email"
