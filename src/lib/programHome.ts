@@ -17,6 +17,8 @@ export type HomeSummary = {
   nextEvent: { id: string; name: string; starts_at: string } | null
   /** The viewer's volunteer jobs at that next event, if any. */
   myJobs: string[]
+  /** Files in the shared library the viewer can open. */
+  documentCount: number
 }
 
 export async function loadHomeSummary(
@@ -26,7 +28,8 @@ export async function loadHomeSummary(
 ): Promise<HomeSummary> {
   const nowIso = new Date().toISOString()
 
-  const [meResult, membersResult, tasksResult, equipmentResult, eventResult] = await Promise.all([
+  const [meResult, membersResult, tasksResult, equipmentResult, eventResult, docsResult] =
+    await Promise.all([
     memberId
       ? supabase.from('program_members').select('display_name').eq('id', memberId).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -63,6 +66,11 @@ export async function loadHomeSummary(
       .gte('starts_at', nowIso)
       .order('starts_at', { ascending: true })
       .limit(1),
+
+    supabase
+      .from('program_documents')
+      .select('id', { count: 'exact', head: true })
+      .eq('program_id', programId),
   ])
 
   const nextEvent = eventResult.data?.[0] ?? null
@@ -84,6 +92,7 @@ export async function loadHomeSummary(
     equipmentCount: equipmentResult.count ?? 0,
     nextEvent,
     myJobs,
+    documentCount: docsResult.count ?? 0,
   }
 }
 

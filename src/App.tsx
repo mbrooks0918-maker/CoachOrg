@@ -13,6 +13,7 @@ import TasksPage from './pages/TasksPage'
 import GameDayPage from './pages/GameDayPage'
 import EquipmentPage from './pages/EquipmentPage'
 import ProgramHome from './pages/ProgramHome'
+import DocumentsPage from './pages/DocumentsPage'
 import EventDetailPage from './pages/EventDetailPage'
 
 /**
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="equipment" element={<EquipmentPage />} />
         <Route path="game-day" element={<GameDayPage />} />
         <Route path="game-day/:eventId" element={<EventDetailPage />} />
+        <Route path="documents" element={<DocumentsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -50,3 +50,10 @@ export const GameDayIcon = ({ size = 22 }: IconProps) => (
     <path d="M5 5h11.5l-1.75 3.25L16.5 11.5H5" />
   </svg>
 )
+
+export const DocumentsIcon = ({ size = 22 }: IconProps) => (
+  <svg {...shared(size)}>
+    <path d="M14 3.5H7.5A1.5 1.5 0 0 0 6 5v14a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V7.5L14 3.5Z" />
+    <path d="M13.75 3.75V8h4.1M9 13h6M9 16.5h4" />
+  </svg>
+)

@@ -66,6 +66,17 @@ export default function ProgramHome() {
               : 'Nothing checked out',
         }
 
+      case 'documents':
+        return {
+          title: 'Documents',
+          line:
+            summary.documentCount > 0
+              ? `${plural(summary.documentCount, 'file', 'files')} shared`
+              : staff
+                ? 'Nothing uploaded yet'
+                : 'Nothing shared yet',
+        }
+
       case 'game-day':
       default:
         if (summary.myJobs.length > 0) {
@@ -98,13 +109,16 @@ export default function ProgramHome() {
 
       {/* Two across even on a phone: four large targets without scrolling. */}
       <div className="mt-8 grid grid-cols-2 gap-4">
-        {NAV.map(({ to, Icon }) => {
+        {NAV.map(({ to, Icon }, index) => {
           const { title, line } = describe(to)
+          // With an odd number of sections the last tile takes the full row
+          // rather than leaving a gap beside it.
+          const wide = index === NAV.length - 1 && NAV.length % 2 === 1
           return (
             <Link
               key={to}
               to={to}
-              className="group flex min-h-40 flex-col justify-between rounded-xl border border-border bg-surface px-5 py-5 transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:min-h-44 sm:px-6 sm:py-6"
+              className={`group flex min-h-40 flex-col justify-between rounded-xl border border-border bg-surface px-5 py-5 transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:min-h-44 sm:px-6 sm:py-6 ${wide ? 'col-span-2 min-h-32 sm:min-h-36' : ''}`}
             >
               <span className="text-muted transition group-hover:text-accent">
                 <Icon size={28} />

@@ -163,7 +163,7 @@ export default function AppShell() {
         </div>
 
         {/* ---- Bottom tabs, mobile only ---- */}
-        <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
           {NAV.map(({ to, short, Icon }) => (
             <NavLink key={to} to={to} className={tabLink}>
               <Icon />

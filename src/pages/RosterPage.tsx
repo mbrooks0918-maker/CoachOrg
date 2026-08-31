@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useProgram } from '../lib/programContext'
+import { PlayerDocuments } from '../components/PlayerDocuments'
+import {
+  REQUIRED_DOC_TYPES,
+  byPlayer,
+  listPlayerDocuments,
+  missingTypes,
+  type PlayerDocument,
+} from '../lib/playerDocuments'
 import { MemberPicker } from '../components/MemberPicker'
 import { Button, CodeTile, ErrorNote } from '../components/ui'
 import { CODE_TYPES } from '../lib/codes'
@@ -20,12 +28,13 @@ import {
 type Code = { id: string; code: string; code_type: string }
 
 export default function RosterPage() {
-  const { program, role } = useProgram()
+  const { program, role, memberId } = useProgram()
   const staff = isStaff(role)
 
   const [members, setMembers] = useState<Member[]>([])
   const [links, setLinks] = useState<GuardianLink[]>([])
   const [codes, setCodes] = useState<Code[]>([])
+  const [playerDocs, setPlayerDocs] = useState<PlayerDocument[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -41,12 +50,14 @@ export default function RosterPage() {
     ;(async () => {
       // Codes are head-coach/AD only; a rejected read yields an empty list
       // rather than an error, so the section simply does not render.
-      const [, codesResult] = await Promise.all([
+      const [, codesResult, docsResult] = await Promise.all([
         refresh(),
         supabase.from('program_codes').select('id, code, code_type').eq('program_id', program.id),
+        listPlayerDocuments(program.id),
       ])
       if (!active) return
       if (codesResult.data) setCodes(codesResult.data)
+      setPlayerDocs(docsResult.documents)
       setLoading(false)
     })()
     return () => {
@@ -59,6 +70,12 @@ export default function RosterPage() {
   const { guardiansOf, playersOf } = indexLinks(members, links)
   const players = members.filter((m) => m.role === 'player')
   const guardians = members.filter((m) => m.role === 'parent')
+
+  const docsByPlayer = byPlayer(playerDocs)
+  // Staff-only headline: how many players are fully papered up.
+  const fullyDocumented = players.filter(
+    (p) => missingTypes(docsByPlayer.get(p.id) ?? []).length === 0,
+  ).length
 
   const groups = ROLE_GROUPS.map((g) => ({
     title: g.title,
@@ -110,6 +127,16 @@ export default function RosterPage() {
               links={links}
               canUnlink={staff}
               onChanged={refresh}
+              programId={program.id}
+              docsByPlayer={docsByPlayer}
+              setPlayerDocs={setPlayerDocs}
+              staff={staff}
+              memberId={memberId}
+              note={
+                group.title === 'Players' && staff && group.people.length > 0
+                  ? `${fullyDocumented} of ${group.people.length} have all ${REQUIRED_DOC_TYPES.length} documents on file`
+                  : undefined
+              }
             />
           ))}
           {ungrouped.length > 0 && (
@@ -121,6 +148,11 @@ export default function RosterPage() {
               links={links}
               canUnlink={staff}
               onChanged={refresh}
+              programId={program.id}
+              docsByPlayer={docsByPlayer}
+              setPlayerDocs={setPlayerDocs}
+              staff={staff}
+              memberId={memberId}
             />
           )}
         </div>
@@ -258,6 +290,12 @@ function RosterGroup({
   links,
   canUnlink,
   onChanged,
+  programId,
+  docsByPlayer,
+  setPlayerDocs,
+  staff,
+  memberId,
+  note,
 }: {
   title: string
   people: Member[]
@@ -266,6 +304,12 @@ function RosterGroup({
   links: GuardianLink[]
   canUnlink: boolean
   onChanged: () => Promise<void>
+  programId: string
+  docsByPlayer: Map<string, PlayerDocument[]>
+  setPlayerDocs: React.Dispatch<React.SetStateAction<PlayerDocument[]>>
+  staff: boolean
+  memberId: string | null
+  note?: string
 }) {
   return (
     <div>
@@ -273,6 +317,7 @@ function RosterGroup({
         {title}
         <span className="ml-2 text-muted/60">{people.length}</span>
       </h3>
+      {note && <p className="mt-1.5 font-body text-xs text-muted/80">{note}</p>}
 
       {people.length === 0 ? (
         <p className="mt-3 font-body text-sm text-muted/70">None yet.</p>
@@ -307,6 +352,27 @@ function RosterGroup({
                 <p className="mt-1 font-mono text-[0.7rem] uppercase tracking-wider text-muted/70">
                   {formatJoined(m.joined_at)}
                 </p>
+
+                {m.role === 'player' &&
+                  (staff ||
+                    links.some(
+                      (l) => l.player_member_id === m.id && l.guardian_member_id === memberId,
+                    ) ||
+                    docsByPlayer.has(m.id)) && (
+                    <PlayerDocuments
+                      programId={programId}
+                      playerMemberId={m.id}
+                      playerName={m.display_name}
+                      documents={docsByPlayer.get(m.id) ?? []}
+                      canManage={
+                        staff ||
+                        links.some(
+                          (l) => l.player_member_id === m.id && l.guardian_member_id === memberId,
+                        )
+                      }
+                      onChanged={setPlayerDocs}
+                    />
+                  )}
 
                 {showRelations && (
                   <Relations

@@ -1,4 +1,5 @@
 import {
+  DocumentsIcon,
   EquipmentIcon,
   GameDayIcon,
   RosterIcon,
@@ -16,4 +17,5 @@ export const NAV = [
   { to: 'tasks', label: 'Scheduled Tasks', short: 'Tasks', Icon: TasksIcon },
   { to: 'equipment', label: 'Equipment', short: 'Gear', Icon: EquipmentIcon },
   { to: 'game-day', label: 'Game-Day Ops', short: 'Game Day', Icon: GameDayIcon },
+  { to: 'documents', label: 'Documents', short: 'Docs', Icon: DocumentsIcon },
 ] as const
