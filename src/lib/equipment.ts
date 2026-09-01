@@ -72,8 +72,8 @@ export async function loadEquipment(programId: string) {
       .eq('program_id', programId)
       .order('checked_out_at', { ascending: false }),
     supabase
-      .from('program_members')
-      .select('id, user_id, display_name, role, phone_number, joined_at')
+      .from('program_roster')
+      .select('id, person_id, user_id, display_name, role, phone_number, joined_at')
       .eq('program_id', programId)
       .order('display_name'),
   ])

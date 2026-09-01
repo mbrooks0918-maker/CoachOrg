@@ -64,8 +64,8 @@ export default function JoinProgram() {
 
     // Family code: fetch the players so they can say who they belong to.
     const { data: roster } = await supabase
-      .from('program_members')
-      .select('id, user_id, display_name, role, phone_number, joined_at')
+      .from('program_roster')
+      .select('id, person_id, user_id, display_name, role, phone_number, joined_at')
       .eq('program_id', member.program_id)
       .eq('role', 'player')
       .order('display_name')

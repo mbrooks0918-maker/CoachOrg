@@ -31,7 +31,7 @@ export async function loadHomeSummary(
   const [meResult, membersResult, tasksResult, equipmentResult, eventResult, docsResult] =
     await Promise.all([
     memberId
-      ? supabase.from('program_members').select('display_name').eq('id', memberId).maybeSingle()
+      ? supabase.from('program_roster').select('display_name').eq('id', memberId).maybeSingle()
       : Promise.resolve({ data: null }),
 
     supabase

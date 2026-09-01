@@ -211,8 +211,8 @@ export async function loadEventDetail(eventId: string, programId: string) {
       .eq('event_id', eventId)
       .order('role_label'),
     supabase
-      .from('program_members')
-      .select('id, user_id, display_name, role, phone_number, joined_at')
+      .from('program_roster')
+      .select('id, person_id, user_id, display_name, role, phone_number, joined_at')
       .eq('program_id', programId)
       .order('display_name'),
   ])

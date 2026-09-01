@@ -85,11 +85,29 @@ export default function CreateOrg() {
       return
     }
 
-    // Step 3 -- head coach's own membership row.
+    // Step 3 -- the head coach as a person of this organization, then their
+    // membership row pointing at it. A roster row no longer carries a name of
+    // its own; it names the person who holds the spot.
+    const { data: person, error: personError } = await supabase
+      .from('people')
+      .insert({
+        organization_id: org.id,
+        full_name: session.user.email?.split('@')[0] ?? 'Head Coach',
+        user_id: userId,
+      })
+      .select('id')
+      .single()
+
+    if (personError || !person) {
+      await supabase.from('organizations').delete().eq('id', org.id)
+      setBusy(false)
+      setError(personError?.message ?? 'Could not create your profile.')
+      return
+    }
+
     const { error: memberError } = await supabase.from('program_members').insert({
       program_id: program.id,
-      user_id: userId,
-      display_name: session.user.email?.split('@')[0] ?? 'Head Coach',
+      person_id: person.id,
       role: 'head_coach',
     })
 
