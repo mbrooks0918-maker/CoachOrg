@@ -15,12 +15,16 @@ import { supabase } from '../lib/supabaseClient'
 import {
   ROLE_GROUPS,
   ROLE_LABEL,
+  createClaimCode,
   formatJoined,
   indexLinks,
   isStaff,
   linkGuardian,
+  loadClaimCodes,
   loadRoster,
+  revokeClaimCode,
   unlinkGuardian,
+  type ClaimCode,
   type GuardianLink,
   type Member,
 } from '../lib/roster'
@@ -35,6 +39,7 @@ export default function RosterPage() {
   const [links, setLinks] = useState<GuardianLink[]>([])
   const [codes, setCodes] = useState<Code[]>([])
   const [playerDocs, setPlayerDocs] = useState<PlayerDocument[]>([])
+  const [claimCodes, setClaimCodes] = useState<ClaimCode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -42,6 +47,11 @@ export default function RosterPage() {
     const { members, links, error } = await loadRoster(program.id)
     setMembers(members)
     setLinks(links)
+    // Staff-only, like the join codes: a rejected read is an empty list and
+    // the invite controls never render.
+    setClaimCodes(
+      await loadClaimCodes(members.filter((m) => m.role === 'player').map((m) => m.person_id)),
+    )
     if (error) setError(error)
   }, [program.id])
 
@@ -72,6 +82,7 @@ export default function RosterPage() {
   const guardians = members.filter((m) => m.role === 'parent')
 
   const docsByPlayer = byPlayer(playerDocs)
+  const claimByPerson = new Map(claimCodes.map((c) => [c.person_id, c]))
   // Staff-only headline: how many players are fully papered up.
   const fullyDocumented = players.filter(
     (p) => missingTypes(docsByPlayer.get(p.id) ?? []).length === 0,
@@ -132,6 +143,8 @@ export default function RosterPage() {
               setPlayerDocs={setPlayerDocs}
               staff={staff}
               memberId={memberId}
+              claimByPerson={claimByPerson}
+              onCodeChanged={refresh}
               note={
                 group.title === 'Players' && staff && group.people.length > 0
                   ? `${fullyDocumented} of ${group.people.length} have all ${REQUIRED_DOC_TYPES.length} documents on file`
@@ -153,6 +166,8 @@ export default function RosterPage() {
               setPlayerDocs={setPlayerDocs}
               staff={staff}
               memberId={memberId}
+              claimByPerson={claimByPerson}
+              onCodeChanged={refresh}
             />
           )}
         </div>
@@ -295,6 +310,8 @@ function RosterGroup({
   setPlayerDocs,
   staff,
   memberId,
+  claimByPerson,
+  onCodeChanged,
   note,
 }: {
   title: string
@@ -309,6 +326,8 @@ function RosterGroup({
   setPlayerDocs: React.Dispatch<React.SetStateAction<PlayerDocument[]>>
   staff: boolean
   memberId: string | null
+  claimByPerson: Map<string, ClaimCode>
+  onCodeChanged: () => Promise<void>
   note?: string
 }) {
   return (
@@ -374,6 +393,15 @@ function RosterGroup({
                     />
                   )}
 
+                {staff && m.role === 'player' && (
+                  <FamilyInvite
+                    programId={programId}
+                    player={m}
+                    claim={claimByPerson.get(m.person_id)}
+                    onChanged={onCodeChanged}
+                  />
+                )}
+
                 {showRelations && (
                   <Relations
                     label={relationLabel}
@@ -390,6 +418,106 @@ function RosterGroup({
           })}
         </ul>
       )}
+    </div>
+  )
+}
+
+// ------------------------------------------------------- family invite ----
+
+/**
+ * The staff-side half of the claim flow: mint a code for one child and hand it
+ * to the adult you actually know.
+ *
+ * This replaced letting a parent pick their children off the roster. Being
+ * given this code is what proves the relationship, so it is worth treating
+ * like a key: it lapses after thirty days, covers two redemptions, and can be
+ * withdrawn the moment it goes somewhere it should not have.
+ */
+function FamilyInvite({
+  programId,
+  player,
+  claim,
+  onChanged,
+}: {
+  programId: string
+  player: Member
+  claim?: ClaimCode
+  onChanged: () => Promise<void>
+}) {
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  async function mint() {
+    setBusy(true)
+    setError('')
+    const result = await createClaimCode(programId, player.person_id, player.display_name)
+    if (!result.ok) setError(result.message)
+    else await onChanged()
+    setBusy(false)
+  }
+
+  async function withdraw() {
+    if (!claim) return
+    setBusy(true)
+    setError('')
+    const result = await revokeClaimCode(claim.id)
+    if (!result.ok) setError(result.message)
+    else await onChanged()
+    setBusy(false)
+  }
+
+  async function copy() {
+    if (!claim) return
+    try {
+      await navigator.clipboard.writeText(claim.code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError('Could not copy. Read it out instead.')
+    }
+  }
+
+  if (!claim) {
+    return (
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={mint}
+          disabled={busy}
+          className="font-body text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent disabled:opacity-50"
+        >
+          {busy ? 'Making a code…' : '+ Family code'}
+        </button>
+        {error && <p className="mt-1 font-body text-xs text-accent">{error}</p>}
+      </div>
+    )
+  }
+
+  const remaining = claim.max_uses - claim.uses
+
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+      <button
+        type="button"
+        onClick={copy}
+        className="font-mono text-xs font-bold tracking-[0.06em] text-accent underline underline-offset-4 transition hover:brightness-125"
+        aria-label={`Copy family code for ${player.display_name}`}
+      >
+        {claim.code}
+      </button>
+      <span className="font-body text-[0.7rem] uppercase tracking-wider text-muted/70">
+        {copied ? 'Copied' : `${remaining} of ${claim.max_uses} left`}
+      </span>
+      <button
+        type="button"
+        onClick={withdraw}
+        disabled={busy}
+        className="font-body text-[0.7rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-ink disabled:opacity-50"
+      >
+        {busy ? 'Withdrawing…' : 'Withdraw'}
+      </button>
+      {error && <p className="w-full font-body text-xs text-accent">{error}</p>}
     </div>
   )
 }

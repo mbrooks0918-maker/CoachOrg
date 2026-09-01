@@ -1,3 +1,4 @@
+import { buildCode, nameSegment, orgPrefix } from './codes'
 import { supabase } from './supabaseClient'
 
 export type Member = {
@@ -179,4 +180,96 @@ export async function unlinkGuardian(linkId: string): Promise<{ ok: boolean; mes
   if (error) return { ok: false, message: error.message }
   if (!count) return { ok: false, message: 'You do not have permission to remove that link.' }
   return { ok: true, message: 'Unlinked.' }
+}
+
+// -------------------------------------------------------------- claim codes
+
+/** A live invitation to become one child's guardian. */
+export type ClaimCode = {
+  id: string
+  person_id: string
+  code: string
+  expires_at: string
+  uses: number
+  max_uses: number
+}
+
+const CLAIM_FIELDS = 'id, person_id, code, expires_at, uses, max_uses'
+
+/**
+ * Live claim codes for the people on this roster.
+ *
+ * Only staff over those people can read them at all, so a rejected read comes
+ * back as an empty list and the invite controls simply do not appear.
+ */
+export async function loadClaimCodes(personIds: string[]): Promise<ClaimCode[]> {
+  if (personIds.length === 0) return []
+  const { data } = await supabase
+    .from('person_claim_codes')
+    .select(CLAIM_FIELDS)
+    .in('person_id', personIds)
+    .is('revoked_at', null)
+    .gt('expires_at', new Date().toISOString())
+  return (data ?? []) as ClaimCode[]
+}
+
+/**
+ * Mint a code for one child.
+ *
+ * `code` is globally unique and the suffix is short enough to collide, so a
+ * rejected insert is retried with a fresh one rather than failed -- the same
+ * approach the program codes take when a team is created.
+ */
+export async function createClaimCode(
+  programId: string,
+  personId: string,
+  personName: string,
+): Promise<{ ok: boolean; message: string; claim?: ClaimCode }> {
+  const [{ data: program }, { data: auth }] = await Promise.all([
+    supabase
+      .from('programs')
+      .select('organization_id, organizations(name)')
+      .eq('id', programId)
+      .single(),
+    supabase.auth.getUser(),
+  ])
+
+  const organizationId = program?.organization_id as string | undefined
+  const orgName = (program?.organizations as { name?: string } | null)?.name ?? ''
+  const userId = auth.user?.id
+
+  if (!organizationId || !userId) {
+    return { ok: false, message: 'Could not work out which organization this team belongs to.' }
+  }
+
+  const prefix = orgPrefix(orgName)
+  const segment = nameSegment(personName)
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data, error } = await supabase
+      .from('person_claim_codes')
+      .insert({
+        organization_id: organizationId,
+        person_id: personId,
+        code: buildCode(prefix, segment),
+        created_by: userId,
+      })
+      .select(CLAIM_FIELDS)
+      .single()
+
+    if (!error) return { ok: true, message: 'Code created.', claim: data as ClaimCode }
+    if (error.code !== '23505') return { ok: false, message: error.message }
+  }
+  return { ok: false, message: 'Could not find an unused code. Try again.' }
+}
+
+/** Withdraw a code without deleting the record of it having existed. */
+export async function revokeClaimCode(id: string): Promise<{ ok: boolean; message: string }> {
+  const { error, count } = await supabase
+    .from('person_claim_codes')
+    .update({ revoked_at: new Date().toISOString() }, { count: 'exact' })
+    .eq('id', id)
+  if (error) return { ok: false, message: error.message }
+  if (!count) return { ok: false, message: 'You do not have permission to withdraw that code.' }
+  return { ok: true, message: 'Withdrawn.' }
 }

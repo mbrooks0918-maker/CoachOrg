@@ -45,3 +45,17 @@ export function orgPrefix(organizationName: string): string {
 export function buildCode(prefix: string, segment: string): string {
   return `${prefix}-${segment}-${randomSuffix()}`
 }
+
+/**
+ * The segment of a per-child code: their first name, letters only.
+ *
+ * Deliberately not random. Staff hand these out one child at a time and the
+ * name is what stops a code going to the wrong family -- a screen of
+ * ALB-X7K2, ALB-9QMR, ALB-P4TW is unhandable. It reveals nothing to the
+ * recipient that the code was not already about.
+ */
+export function nameSegment(fullName: string): string {
+  const first = fullName.trim().split(/\s+/)[0] ?? ''
+  const letters = first.toUpperCase().replace(/[^A-Z]/g, '')
+  return letters ? letters.slice(0, 6) : 'FAM'
+}
