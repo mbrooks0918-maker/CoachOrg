@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
+import { loadProgramFeatures, type Feature } from '../lib/features'
 import { NAV } from '../lib/navSections'
 
 /** Belongs to the shell rather than the section list -- it is not a section. */
@@ -31,6 +32,7 @@ export default function AppShell() {
   const [role, setRole] = useState<string | null>(null)
   const [memberId, setMemberId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [features, setFeatures] = useState<Feature[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -42,7 +44,7 @@ export default function AppShell() {
       const { data: userData } = await supabase.auth.getUser()
       const uid = userData.user?.id ?? null
 
-      const [programResult, roleResult, memberResult] = await Promise.all([
+      const [programResult, roleResult, memberResult, featureResult] = await Promise.all([
         supabase.from('programs').select('id, name, sport').eq('id', programId).single(),
         supabase.rpc('program_role', { p_program_id: programId }),
         uid
@@ -53,6 +55,7 @@ export default function AppShell() {
               .eq('user_id', uid)
               .maybeSingle()
           : Promise.resolve({ data: null }),
+        loadProgramFeatures(programId),
       ])
       if (!active) return
 
@@ -61,6 +64,7 @@ export default function AppShell() {
       if (roleResult.data) setRole(roleResult.data as string)
       setUserId(uid)
       setMemberId(memberResult.data?.id ?? null)
+      setFeatures(featureResult)
       setLoading(false)
     })()
 
@@ -92,7 +96,7 @@ export default function AppShell() {
   }
 
   return (
-    <ProgramContext value={{ program, role, memberId, userId }}>
+    <ProgramContext value={{ program, role, memberId, userId, features }}>
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
