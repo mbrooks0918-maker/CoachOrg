@@ -1,7 +1,7 @@
 import { createContext, use } from 'react'
 import type { Feature } from './features'
 
-export type Program = { id: string; name: string; sport: string }
+export type Program = { id: string; name: string; sport: string; organization_id: string }
 
 export type ProgramContextValue = {
   program: Program
@@ -13,6 +13,12 @@ export type ProgramContextValue = {
   userId: string | null
   /** Capabilities this program's organization has unlocked. */
   features: Feature[]
+  /**
+   * Owner or athletic director of the organization above this program.
+   * Deliberately not "runs a team": a head coach of every program in the park
+   * is still not the person the organization-level view is for.
+   */
+  orgLeader: boolean
 }
 
 /**

@@ -14,7 +14,7 @@ import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/pro
  * tile is a link to a screen that already exists.
  */
 export default function ProgramHome() {
-  const { program, role, memberId, features } = useProgram()
+  const { program, role, memberId, features, orgLeader } = useProgram()
   const staff = isStaff(role)
 
   const [summary, setSummary] = useState<HomeSummary | null>(null)
@@ -117,6 +117,28 @@ export default function ProgramHome() {
           ? 'Everything for this team, in one place.'
           : 'Your team, and what you need from it.'}
       </p>
+
+      {/* The way up. Only for whoever runs the organization; a coach of every
+          team in the park still does not see it. Lives here as well as in the
+          sidebar because the sidebar is desktop-only. */}
+      {orgLeader && (
+        <Link
+          to={`/org/${program.organization_id}`}
+          className="mt-6 flex items-center justify-between rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <span>
+            <span className="block font-body text-[0.65rem] font-medium uppercase tracking-[0.25em] text-muted">
+              Every program
+            </span>
+            <span className="mt-1 block font-display text-base font-semibold uppercase tracking-wide text-ink">
+              Organization overview
+            </span>
+          </span>
+          <span aria-hidden="true" className="font-mono text-accent">
+            →
+          </span>
+        </Link>
+      )}
 
       {/* Two across even on a phone: four large targets without scrolling. */}
       <div className="mt-8 grid grid-cols-2 gap-4">

@@ -17,6 +17,7 @@ import DocumentsPage from './pages/DocumentsPage'
 import EventDetailPage from './pages/EventDetailPage'
 import RegistrationPage from './pages/RegistrationPage'
 import RegisterPublic from './pages/RegisterPublic'
+import OrgOverview from './pages/OrgOverview'
 
 /**
  * Waits for the initial session check before deciding. Without the `loading`
@@ -69,6 +70,16 @@ export default function App() {
 
       {/* Everything inside a program shares the navigation shell, which loads
           the program and the viewer's role once for all four sections. */}
+      {/* Above the programs, not inside one: AppShell is scoped to a single
+          program and this view is deliberately not. */}
+      <Route
+        path="/org/:organizationId"
+        element={
+          <RequireAuth>
+            <OrgOverview />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/program/:programId"
         element={

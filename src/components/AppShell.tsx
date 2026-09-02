@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
 import { loadProgramFeatures, type Feature } from '../lib/features'
+import { isOrgLeader } from '../lib/orgOverview'
 import { visibleNav } from '../lib/navSections'
 
 /** Belongs to the shell rather than the section list -- it is not a section. */
@@ -33,6 +34,7 @@ export default function AppShell() {
   const [memberId, setMemberId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [features, setFeatures] = useState<Feature[]>([])
+  const [orgLeader, setOrgLeader] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -45,7 +47,7 @@ export default function AppShell() {
       const uid = userData.user?.id ?? null
 
       const [programResult, roleResult, memberResult, featureResult] = await Promise.all([
-        supabase.from('programs').select('id, name, sport').eq('id', programId).single(),
+        supabase.from('programs').select('id, name, sport, organization_id').eq('id', programId).single(),
         supabase.rpc('program_role', { p_program_id: programId }),
         uid
           ? supabase
@@ -60,7 +62,12 @@ export default function AppShell() {
       if (!active) return
 
       if (programResult.error) setError(programResult.error.message)
-      else setProgram(programResult.data)
+      else {
+        setProgram(programResult.data)
+        // Asked after the program loads because it is keyed on the
+        // organization, which the program row is what tells us.
+        setOrgLeader(await isOrgLeader(programResult.data.organization_id))
+      }
       if (roleResult.data) setRole(roleResult.data as string)
       setUserId(uid)
       setMemberId(memberResult.data?.id ?? null)
@@ -96,7 +103,7 @@ export default function AppShell() {
   }
 
   return (
-    <ProgramContext value={{ program, role, memberId, userId, features }}>
+    <ProgramContext value={{ program, role, memberId, userId, features, orgLeader }}>
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
@@ -114,6 +121,15 @@ export default function AppShell() {
               {program.sport}
             </p>
           </Link>
+
+          {orgLeader && (
+            <Link
+              to={`/org/${program.organization_id}`}
+              className="border-b border-border px-6 py-3 font-body text-xs uppercase tracking-wider text-muted transition hover:bg-accent/5 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+            >
+              ← Organization overview
+            </Link>
+          )}
 
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
             {visibleNav(features).map(({ to, label, Icon }) => (
