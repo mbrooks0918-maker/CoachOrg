@@ -15,6 +15,8 @@ import EquipmentPage from './pages/EquipmentPage'
 import ProgramHome from './pages/ProgramHome'
 import DocumentsPage from './pages/DocumentsPage'
 import EventDetailPage from './pages/EventDetailPage'
+import RegistrationPage from './pages/RegistrationPage'
+import RegisterPublic from './pages/RegisterPublic'
 
 /**
  * Waits for the initial session check before deciding. Without the `loading`
@@ -43,6 +45,9 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
+      {/* Public. No RequireAuth: a parent must be able to read a season before
+          they have an account. Submitting still requires one. */}
+      <Route path="/register/:token" element={<RegisterPublic />} />
       {/* Google returns here; the page then routes exactly as an email login does. */}
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route
@@ -81,6 +86,7 @@ export default function App() {
         <Route path="game-day" element={<GameDayPage />} />
         <Route path="game-day/:eventId" element={<EventDetailPage />} />
         <Route path="documents" element={<DocumentsPage />} />
+        <Route path="registration" element={<RegistrationPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

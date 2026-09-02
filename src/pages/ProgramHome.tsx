@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { NAV } from '../lib/navSections'
+import { visibleNav } from '../lib/navSections'
 import { useProgram } from '../lib/programContext'
 import { ROLE_LABEL, isStaff } from '../lib/roster'
 import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/programHome'
@@ -14,7 +14,7 @@ import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/pro
  * tile is a link to a screen that already exists.
  */
 export default function ProgramHome() {
-  const { program, role, memberId } = useProgram()
+  const { program, role, memberId, features } = useProgram()
   const staff = isStaff(role)
 
   const [summary, setSummary] = useState<HomeSummary | null>(null)
@@ -66,6 +66,15 @@ export default function ProgramHome() {
               : 'Nothing checked out',
         }
 
+      case 'registration':
+        return {
+          title: 'Registration',
+          line:
+            summary.openSeasons > 0
+              ? `${plural(summary.openSeasons, 'season', 'seasons')} open`
+              : 'No sign-ups open',
+        }
+
       case 'documents':
         return {
           title: 'Documents',
@@ -93,6 +102,8 @@ export default function ProgramHome() {
     }
   }
 
+  const sections = visibleNav(features)
+
   return (
     <div>
       <p className="font-body text-xs font-medium uppercase tracking-[0.3em] text-muted">
@@ -109,11 +120,11 @@ export default function ProgramHome() {
 
       {/* Two across even on a phone: four large targets without scrolling. */}
       <div className="mt-8 grid grid-cols-2 gap-4">
-        {NAV.map(({ to, Icon }, index) => {
+        {sections.map(({ to, Icon }, index) => {
           const { title, line } = describe(to)
           // With an odd number of sections the last tile takes the full row
           // rather than leaving a gap beside it.
-          const wide = index === NAV.length - 1 && NAV.length % 2 === 1
+          const wide = index === sections.length - 1 && sections.length % 2 === 1
           return (
             <Link
               key={to}

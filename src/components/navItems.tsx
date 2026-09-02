@@ -57,3 +57,10 @@ export const DocumentsIcon = ({ size = 22 }: IconProps) => (
     <path d="M13.75 3.75V8h4.1M9 13h6M9 16.5h4" />
   </svg>
 )
+
+export const RegistrationIcon = ({ size = 22 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M16 3H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z" />
+    <path d="M9.5 8.5h5M9.5 12h5M9.5 15.5h2.5" />
+  </svg>
+)

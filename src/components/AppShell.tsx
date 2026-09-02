@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
 import { loadProgramFeatures, type Feature } from '../lib/features'
-import { NAV } from '../lib/navSections'
+import { visibleNav } from '../lib/navSections'
 
 /** Belongs to the shell rather than the section list -- it is not a section. */
 const SignOutIcon = () => (
@@ -116,7 +116,7 @@ export default function AppShell() {
           </Link>
 
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
-            {NAV.map(({ to, label, Icon }) => (
+            {visibleNav(features).map(({ to, label, Icon }) => (
               <NavLink key={to} to={to} className={sidebarLink}>
                 <Icon />
                 <span>{label}</span>
@@ -168,7 +168,7 @@ export default function AppShell() {
 
         {/* ---- Bottom tabs, mobile only ---- */}
         <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
-          {NAV.map(({ to, short, Icon }) => (
+          {visibleNav(features).map(({ to, short, Icon }) => (
             <NavLink key={to} to={to} className={tabLink}>
               <Icon />
               <span className="text-[0.65rem] font-medium uppercase tracking-wider">{short}</span>

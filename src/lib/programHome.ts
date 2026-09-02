@@ -19,6 +19,8 @@ export type HomeSummary = {
   myJobs: string[]
   /** Files in the shared library the viewer can open. */
   documentCount: number
+  /** Seasons taking sign-ups right now. Always zero without the feature. */
+  openSeasons: number
 }
 
 export async function loadHomeSummary(
@@ -28,8 +30,9 @@ export async function loadHomeSummary(
 ): Promise<HomeSummary> {
   const nowIso = new Date().toISOString()
 
-  const [meResult, membersResult, tasksResult, equipmentResult, eventResult, docsResult] =
-    await Promise.all([
+  const [
+    meResult, membersResult, tasksResult, equipmentResult, eventResult, docsResult, seasonsResult,
+  ] = await Promise.all([
     memberId
       ? supabase.from('program_roster').select('display_name').eq('id', memberId).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -71,6 +74,15 @@ export async function loadHomeSummary(
       .from('program_documents')
       .select('id', { count: 'exact', head: true })
       .eq('program_id', programId),
+
+    // Empty for a program whose organization has no registration feature --
+    // the policies return nothing rather than the caller asking first.
+    supabase
+      .from('seasons')
+      .select('id', { count: 'exact', head: true })
+      .eq('program_id', programId)
+      .lte('registration_opens_at', nowIso)
+      .gte('registration_closes_at', nowIso),
   ])
 
   const nextEvent = eventResult.data?.[0] ?? null
@@ -93,6 +105,7 @@ export async function loadHomeSummary(
     nextEvent,
     myJobs,
     documentCount: docsResult.count ?? 0,
+    openSeasons: seasonsResult.count ?? 0,
   }
 }
 
