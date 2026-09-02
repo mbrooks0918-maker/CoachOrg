@@ -237,10 +237,20 @@ export async function submitRegistration(
   return { ok: true, message: 'Registered.', result: data as SubmitResult }
 }
 
-/** "Sat, 5 Sep 2026" */
+/**
+ * "Sat, 5 Sep 2026".
+ *
+ * Takes both the date columns (starts_on, age_as_of) and the timestamps
+ * (registration_opens_at). A date has no timezone, so handing "2026-09-15"
+ * straight to Date() makes it midnight UTC and renders it as the 14th
+ * anywhere west of Greenwich -- a season shown starting the day before the
+ * one its organizer typed. Pinning it to local midnight keeps the date the
+ * date. Timestamps are real instants and are converted as normal.
+ */
 export function longDate(value: string | null): string {
   if (!value) return '—'
-  return new Date(value).toLocaleDateString(undefined, {
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value)
+  return new Date(dateOnly ? `${value}T00:00:00` : value).toLocaleDateString(undefined, {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
