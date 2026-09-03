@@ -82,6 +82,9 @@ export async function listReminders(programId: string) {
     .from('scheduled_tasks')
     .select('id, title, body, send_at, target_role, sent')
     .eq('program_id', programId)
+    // Announcement pushes ride this table too; they belong to the feed that
+    // created them, not to the list of reminders somebody wrote by hand.
+    .eq('source', 'manual')
     .order('send_at', { ascending: true })
 }
 

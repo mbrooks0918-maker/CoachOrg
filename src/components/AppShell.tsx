@@ -1,9 +1,10 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
 import { loadProgramFeatures, type Feature } from '../lib/features'
 import { Wordmark } from './brand'
+import { unreadCount } from '../lib/announcements'
 import { rememberLastProgram } from '../lib/lastProgram'
 import { isOrgLeader } from '../lib/orgOverview'
 import { visibleNav } from '../lib/navSections'
@@ -37,8 +38,13 @@ export default function AppShell() {
   const [userId, setUserId] = useState<string | null>(null)
   const [features, setFeatures] = useState<Feature[]>([])
   const [orgLeader, setOrgLeader] = useState(false)
+  const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+
+  const refreshUnread = useCallback(async () => {
+    if (programId) setUnread(await unreadCount(programId))
+  }, [programId])
 
   useEffect(() => {
     if (!programId) return
@@ -48,7 +54,8 @@ export default function AppShell() {
       const { data: userData } = await supabase.auth.getUser()
       const uid = userData.user?.id ?? null
 
-      const [programResult, roleResult, memberResult, featureResult] = await Promise.all([
+      const [programResult, roleResult, memberResult, featureResult, unreadResult] =
+        await Promise.all([
         supabase.from('programs').select('id, name, sport, organization_id').eq('id', programId).single(),
         supabase.rpc('program_role', { p_program_id: programId }),
         uid
@@ -60,6 +67,7 @@ export default function AppShell() {
               .maybeSingle()
           : Promise.resolve({ data: null }),
         loadProgramFeatures(programId),
+        unreadCount(programId),
       ])
       if (!active) return
 
@@ -77,6 +85,7 @@ export default function AppShell() {
       setUserId(uid)
       setMemberId(memberResult.data?.id ?? null)
       setFeatures(featureResult)
+      setUnread(unreadResult)
       setLoading(false)
     })()
 
@@ -108,7 +117,9 @@ export default function AppShell() {
   }
 
   return (
-    <ProgramContext value={{ program, role, memberId, userId, features, orgLeader }}>
+    <ProgramContext
+      value={{ program, role, memberId, userId, features, orgLeader, unreadCount: unread, refreshUnread }}
+    >
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
@@ -139,8 +150,13 @@ export default function AppShell() {
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
             {visibleNav(features).map(({ to, label, Icon }) => (
               <NavLink key={to} to={to} className={sidebarLink}>
-                <Icon />
+                <IconWithBadge Icon={Icon} show={to === 'roster' && unread > 0} />
                 <span>{label}</span>
+                {to === 'roster' && unread > 0 && (
+                  <span className="ml-auto rounded-full bg-accent px-1.5 py-0.5 font-mono text-[0.65rem] font-medium text-bg">
+                    {unread}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -211,13 +227,40 @@ export default function AppShell() {
         >
           {visibleNav(features).map(({ to, short, Icon }) => (
             <NavLink key={to} to={to} className={tabLink}>
-              <Icon />
+              <IconWithBadge Icon={Icon} show={to === 'roster' && unread > 0} />
               <span className="text-[0.65rem] font-medium uppercase tracking-wider">{short}</span>
             </NavLink>
           ))}
         </nav>
       </div>
     </ProgramContext>
+  )
+}
+
+/**
+ * A section icon, with a dot when that section is waiting on you.
+ *
+ * The dot rather than the number on the tab bar: at that size a count is
+ * unreadable, and "there is something new" is the whole message anyway. The
+ * sidebar has room for the number and shows it.
+ */
+function IconWithBadge({
+  Icon,
+  show,
+}: {
+  Icon: (props: { size?: number }) => ReactNode
+  show: boolean
+}) {
+  return (
+    <span className="relative inline-flex">
+      <Icon />
+      {show && (
+        <span
+          aria-hidden="true"
+          className="absolute -right-1 -top-0.5 h-2 w-2 rounded-full bg-accent ring-2 ring-surface"
+        />
+      )}
+    </span>
   )
 }
 

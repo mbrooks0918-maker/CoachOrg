@@ -8,6 +8,7 @@ import {
   missingTypes,
   type PlayerDocument,
 } from '../lib/playerDocuments'
+import { Announcements } from '../components/Announcements'
 import { MemberPicker } from '../components/MemberPicker'
 import { Button, CodeTile, ErrorNote } from '../components/ui'
 import { CODE_TYPES } from '../lib/codes'
@@ -32,7 +33,7 @@ import {
 type Code = { id: string; code: string; code_type: string }
 
 export default function RosterPage() {
-  const { program, role, memberId } = useProgram()
+  const { program, role, memberId, refreshUnread } = useProgram()
   const staff = isStaff(role)
 
   const [members, setMembers] = useState<Member[]>([])
@@ -112,6 +113,10 @@ export default function RosterPage() {
       </div>
 
       <ErrorNote>{error}</ErrorNote>
+
+      <div className="mt-8">
+        <Announcements members={members} onUnreadChanged={refreshUnread} />
+      </div>
 
       {staff && (
         <LinkTool

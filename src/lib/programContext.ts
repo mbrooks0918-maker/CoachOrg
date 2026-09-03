@@ -19,6 +19,10 @@ export type ProgramContextValue = {
    * is still not the person the organization-level view is for.
    */
   orgLeader: boolean
+  /** Announcements in this program the viewer has not seen. */
+  unreadCount: number
+  /** Re-count after reading or deleting one, so the badge keeps up. */
+  refreshUnread: () => Promise<void>
 }
 
 /**
