@@ -66,6 +66,18 @@ is hand-maintained, so it cannot go stale.
 
 ## Icons
 
-`python3 scripts/generate-icons.py` regenerates the PWA icon set from code. The
-mark is drawn from the same geometry as the `Logo` component in
-`src/components/brand.tsx`, so the two cannot drift.
+The identity is the **"Huddle"** brand package, kept in `branding/brand/` with
+its own README, tokens and SVGs: four dots ringing an empty centre, the
+negative space reading as a ball. Ink `#0c140c`, turf `#65c86b`, turf-deep
+`#38853e`, chalk `#d4f1d4`, paper `#f6f9f6`. Instrument Sans throughout,
+JetBrains Mono for codes.
+
+TeamOps runs the dark side of that palette: brand ink is the background and
+turf is the accent, using the package's reverse lockup. Note the naming trap —
+the brand's "ink" is a background colour, while `--color-ink` in `index.css`
+has always meant primary text. `src/index.css` labels the mapping on every line.
+
+`python3 scripts/generate-icons.py` rasterises the PWA icon set from the
+package's own geometry, which is also what the `Logo` component draws, so the
+two cannot drift. The package ships SVG only and asks you to rasterise rather
+than redraw.

@@ -28,3 +28,6 @@ dist-ssr
 .env.local
 .env.*.local
 !.env.example
+
+# The unpacked kit is what we build from; the zip is a duplicate.
+branding/*.zip

@@ -1,54 +1,66 @@
 @import "tailwindcss";
 
 /*
- * TeamOps.
+ * TeamOps — the "Huddle" brand package.
  *
- * The old skin was Albertville's: a warm, red-tinted black with Aggies red as
- * the accent, chosen when one high school was the whole product. TeamOps runs
- * parks and clubs that have their own colours, so wearing one customer's is
- * both wrong and a problem waiting to happen. This palette is deliberately not
- * anybody's team colours.
+ * Real brand colours, mapped into the token structure the app already uses so
+ * nothing downstream had to be retuned.
  *
- * The neutrals are biased cool -- a blue-grey graphite rather than a warm or a
- * flat mid-grey -- so the app reads as an instrument rather than a clubhouse.
- * The accent is scoreboard amber: the colour of a stadium bulb and a marshal's
- * vest, specific to the world the product lives in, and far enough from red,
- * blue and green that no customer's kit will clash with it.
+ * NAMING TRAP, read this before editing: the brand calls its darkest colour
+ * "ink" and means the background. This stylesheet has always called its
+ * primary TEXT colour --color-ink. They are opposites. Brand ink is our
+ * --color-bg; brand paper is our --color-ink. The brand names are kept in the
+ * comments beside each value so the mapping is visible rather than remembered.
  *
- * accent is now brand only. It used to double as the error colour, which meant
- * a form error and a call to action looked the same; danger and good are their
- * own tokens so state reads as state.
+ * The kit reads light-mode-first -- it calls paper the "app background" -- but
+ * TeamOps stays dark, which is a decision Matt made rather than one derived
+ * here. The kit supports it: it ships a reverse lockup, a white mark and a
+ * knockout mark for dark contexts, and sets theme-color to ink itself.
+ *
+ * The kit gives exactly one dark value. A dark interface needs a ramp, so
+ * surface, raised, border and muted are derived from ink along its own hue --
+ * a desaturated green-black -- rather than sampled from anywhere else.
  */
 
 @theme {
-  /* ---- Surfaces ---- */
-  --color-bg: #0b0d10;      /* cool near-black, page background */
-  --color-surface: #14171c; /* cards / panels */
-  --color-raised: #1b1f26;  /* panels sitting on panels */
-  --color-border: #242a33;  /* borders / dividers */
+  /* ---- Surfaces (derived from brand ink, same hue) ---- */
+  --color-bg: #0c140c;      /* BRAND ink — page background, the icon tile */
+  --color-surface: #121a12; /* derived — cards / panels */
+  --color-raised: #182218;  /* derived — panels sitting on panels */
+  --color-border: #253425;  /* derived — borders / dividers */
 
   /* ---- Text ---- */
-  --color-ink: #eef1f5;     /* text primary, cool off-white */
-  --color-muted: #8b95a3;   /* text muted */
+  --color-ink: #f6f9f6;     /* BRAND paper — primary text on dark */
+  --color-muted: #8fa08f;   /* derived — muted text, ~6:1 on bg */
 
   /* ---- Brand ---- */
-  --color-accent: #f5a524;  /* scoreboard amber, primary / CTA */
+  --color-accent: #65c86b;      /* BRAND turf — accent, fills, text on dark */
+  --color-accent-deep: #38853e; /* BRAND turf-deep — accent text on LIGHT only */
+  --color-chalk: #d4f1d4;       /* BRAND chalk — tints, badges, selected rows */
+  --color-paper: #f6f9f6;       /* BRAND paper — kept named for light surfaces */
 
-  /* ---- State ---- */
-  --color-danger: #e5484d;  /* errors, destructive actions */
-  --color-good: #3dd68c;    /* confirmed, done, in good standing */
+  /* ---- State ----
+   * The kit specifies no error colour, as brand kits generally do not, so
+   * danger is ours and deliberately outside the palette: an error must not
+   * look like the brand.
+   *
+   * good is turf on purpose. With a green brand, "confirmed" reading as the
+   * brand colour is correct rather than a collision -- where the two ever need
+   * to be told apart, chalk is the tint to reach for.
+   */
+  --color-danger: #e5484d;
+  --color-good: #65c86b;
 
   /* ---- Type ----
-   * Archivo: an industrial grotesque. Sturdy at heavy weights without the
-   *   sports-poster condensed look Oswald was giving every heading.
-   * Instrument Sans: a body face with some character left in it, which Inter
-   *   deliberately has none of.
-   * JetBrains Mono: join codes get read aloud across a car park, so the mono
-   *   face is the one that keeps 0/O and 1/l/I apart.
+   * The kit specifies Instrument Sans for both display and body -- semibold at
+   * -4% tracking for display, regular at normal tracking for body -- so Archivo
+   * is gone. JetBrains Mono stays for codes and IDs, which the kit lists as its
+   * optional mono and which the join codes need: those get read aloud across a
+   * car park and 0/O and 1/l/I have to stay apart.
    */
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Archivo", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -62,5 +74,11 @@
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* The kit's display rule: semibold, -4% tracking. Applied to the display
+     face itself so every heading gets it without each one remembering. */
+  .font-display {
+    letter-spacing: -0.04em;
   }
 }

@@ -1,0 +1,24 @@
+/* TeamOps brand tokens — Huddle identity */
+:root {
+  --to-ink: #0c140c;
+  --to-turf: #65c86b;
+  --to-turf-deep: #38853e;
+  --to-chalk: #d4f1d4;
+  --to-paper: #f6f9f6;
+
+  --to-font-sans: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  --to-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --to-tracking-display: -0.04em;
+  --to-radius-tile: 22.7%;   /* icon tile corner, size-independent */
+}
+
+/* Display type: semibold, tight tracking. Body: regular, normal tracking. */
+.to-display { font-family: var(--to-font-sans); font-weight: 600; letter-spacing: var(--to-tracking-display); }
+.to-body    { font-family: var(--to-font-sans); font-weight: 400; letter-spacing: normal; line-height: 1.5; }
+
+/* Wordmark: "Team" in ink/white, "Ops" in turf. */
+.to-wordmark { font-family: var(--to-font-sans); font-weight: 600; letter-spacing: var(--to-tracking-display); color: var(--to-ink); }
+.to-wordmark > span { color: var(--to-turf-deep); }
+.to-wordmark--reverse { color: #fff; }
+.to-wordmark--reverse > span { color: var(--to-turf); }
