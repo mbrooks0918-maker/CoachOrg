@@ -46,7 +46,11 @@ export async function loadHomeSummary(
       .from('scheduled_tasks')
       .select('id', { count: 'exact', head: true })
       .eq('program_id', programId)
-      .eq('sent', false),
+      .eq('sent', false)
+      // An announcement's push sits here for up to a minute before the cron
+      // takes it. Counting it would tell a parent a reminder is "coming" when
+      // what is coming is the notification for the post they can already read.
+      .eq('source', 'manual'),
 
     staff
       ? supabase
