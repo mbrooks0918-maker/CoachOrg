@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { findPrimaryProgramId } from '../lib/program'
+import { resolveLandingProgramId } from '../lib/program'
 import { Button, ErrorNote, Field, FormShell } from '../components/ui'
 import { AuthDivider, GoogleButton } from '../components/GoogleButton'
 
@@ -53,7 +53,7 @@ export default function SignUp() {
 
     // Almost always null for a brand-new account, but signUp on an email
     // that already exists returns a session for the existing user.
-    const programId = data.user ? await findPrimaryProgramId(data.user.id) : null
+    const programId = data.user ? await resolveLandingProgramId(data.user.id) : null
     navigate(programId ? `/program/${programId}` : '/create-org', { replace: true })
   }
 

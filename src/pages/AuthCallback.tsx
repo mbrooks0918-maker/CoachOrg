@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { findPrimaryProgramId } from '../lib/program'
+import { resolveLandingProgramId } from '../lib/program'
 
 /**
  * Where Google drops people after they approve.
@@ -34,7 +34,7 @@ export default function AuthCallback() {
 
     let active = true
     ;(async () => {
-      const programId = await findPrimaryProgramId(session.user.id)
+      const programId = await resolveLandingProgramId(session.user.id)
       if (!active) return
       navigate(programId ? `/program/${programId}` : '/create-org', { replace: true })
     })()

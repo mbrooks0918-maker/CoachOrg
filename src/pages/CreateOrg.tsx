@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../auth/AuthProvider'
 import { buildCode, CODE_TYPES, orgPrefix } from '../lib/codes'
-import { findPrimaryProgramId } from '../lib/program'
+import { resolveLandingProgramId } from '../lib/program'
 import { Button, ErrorNote, Field, FormShell } from '../components/ui'
 
 const MAX_CODE_ATTEMPTS = 5
@@ -28,7 +28,7 @@ export default function CreateOrg() {
       return
     }
     let active = true
-    findPrimaryProgramId(userId).then((programId) => {
+    resolveLandingProgramId(userId).then((programId) => {
       if (!active) return
       if (programId) navigate(`/program/${programId}`, { replace: true })
       else setChecking(false)

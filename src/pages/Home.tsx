@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { Wordmark } from '../components/brand'
-import { findPrimaryProgramId } from '../lib/program'
+import { resolveLandingProgramId } from '../lib/program'
 
 /**
  * The marketing page, but only for people who are not signed in.
@@ -26,7 +26,7 @@ export default function Home() {
       // Always awaits, so neither state update lands synchronously inside the
       // effect and starts a second render pass.
       const programId = await (session
-        ? findPrimaryProgramId(session.user.id)
+        ? resolveLandingProgramId(session.user.id)
         : Promise.resolve(null))
       if (!active) return
       if (session) setDestination(programId ? `/program/${programId}` : '/create-org')

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
 import { loadProgramFeatures, type Feature } from '../lib/features'
 import { Wordmark } from './brand'
+import { rememberLastProgram } from '../lib/lastProgram'
 import { isOrgLeader } from '../lib/orgOverview'
 import { visibleNav } from '../lib/navSections'
 
@@ -65,6 +66,9 @@ export default function AppShell() {
       if (programResult.error) setError(programResult.error.message)
       else {
         setProgram(programResult.data)
+        // Recorded only once the program actually loaded, so a mistyped or
+        // forbidden id never becomes the place this person lands next time.
+        if (uid) rememberLastProgram(uid, programId)
         // Asked after the program loads because it is keyed on the
         // organization, which the program row is what tells us.
         setOrgLeader(await isOrgLeader(programResult.data.organization_id))
