@@ -10,7 +10,10 @@ export const BUILD = {
   sha: __BUILD_SHA__,
   short: __BUILD_SHA__ ? __BUILD_SHA__.slice(0, 7) : 'dev',
   ref: __BUILD_REF__,
-  message: __BUILD_MESSAGE__,
+  // Vercel's VERCEL_GIT_COMMIT_MESSAGE is the whole commit message, body and
+  // all, where the local `git log -1 --pretty=%s` fallback is just the subject.
+  // The panel wants one line either way.
+  message: (__BUILD_MESSAGE__ || '').split('\n')[0].trim().slice(0, 90),
   time: __BUILD_TIME__,
 }
 
