@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { TopBar } from '../components/ui'
 import {
   byDay,
   eventWhen,
@@ -47,6 +48,7 @@ export default function OrgOverview() {
   if (error || !overview) {
     return (
       <Shell>
+        <TopBar />
         <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
           Not your overview
         </h1>
@@ -66,6 +68,7 @@ export default function OrgOverview() {
 
   return (
     <Shell>
+      <TopBar />
       <p className="font-body text-xs font-medium uppercase tracking-[0.3em] text-muted">
         Overview
       </p>

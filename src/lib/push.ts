@@ -98,7 +98,7 @@ export async function enablePush(): Promise<{ ok: boolean; message: string }> {
       ok: false,
       message:
         isIOS() && !isStandalone()
-          ? 'On iPhone, add CoachOrg to your Home Screen first, then turn notifications on from there.'
+          ? 'On iPhone, add TeamOps to your Home Screen first, then turn notifications on from there.'
           : 'This browser does not support web push.',
     }
   }

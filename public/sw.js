@@ -1,4 +1,4 @@
-/* CoachOrg service worker — web push only.
+/* TeamOps service worker — web push only.
  *
  * Served from /sw.js so its scope is the whole origin. Kept dependency-free
  * and framework-free: this file is not part of the Vite bundle and never sees
@@ -18,17 +18,17 @@ self.addEventListener('push', (event) => {
     try {
       payload = event.data.json()
     } catch {
-      payload = { title: 'CoachOrg', body: event.data.text() }
+      payload = { title: 'TeamOps', body: event.data.text() }
     }
   }
 
-  const title = payload.title || 'CoachOrg'
+  const title = payload.title || 'TeamOps'
   const options = {
     body: payload.body || '',
     icon: payload.icon || '/icon-192.png',
     badge: payload.badge || '/badge-96.png',
     // Collapses repeats of the same task instead of stacking duplicates.
-    tag: payload.tag || 'coachorg',
+    tag: payload.tag || 'teamops',
     renotify: Boolean(payload.tag),
     requireInteraction: false,
     data: {

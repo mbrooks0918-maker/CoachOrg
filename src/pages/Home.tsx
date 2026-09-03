@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
+import { Wordmark } from '../components/brand'
 import { findPrimaryProgramId } from '../lib/program'
 
 /**
@@ -58,16 +59,15 @@ export default function Home() {
           className="pointer-events-none absolute left-1/2 top-1/3 -z-10 h-[36rem] w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-[120px]"
         />
 
-        <p className="font-body text-xs font-medium uppercase tracking-[0.3em] text-muted">
-          CoachOrg
-        </p>
+        <Wordmark />
 
-        <h1 className="mt-6 max-w-4xl font-display text-5xl font-bold leading-[1.05] tracking-tight text-ink sm:text-6xl lg:text-7xl">
-          Run your team. Skip the chaos.
+        <h1 className="mt-8 max-w-4xl font-display text-5xl font-extrabold leading-[1.03] tracking-tight text-ink sm:text-6xl lg:text-7xl">
+          Run the season,<br className="hidden sm:block" /> not the spreadsheet.
         </h1>
 
         <p className="mt-6 max-w-xl font-body text-lg leading-relaxed text-muted sm:text-xl">
-          Roster, messages, equipment, and game day — one simple app for coaches.
+          Registration, roster, equipment and game day — one place for the people who run
+          youth sport.
         </p>
 
         <div className="mt-10 flex w-full max-w-md flex-col gap-4 sm:w-auto sm:flex-row">
@@ -75,7 +75,7 @@ export default function Home() {
             to="/signup"
             className="inline-flex items-center justify-center rounded-lg bg-accent px-8 py-3.5 font-body text-base font-semibold text-ink transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
           >
-            Create a Team
+            Start a Team
           </Link>
           <Link
             to="/join"
@@ -99,7 +99,7 @@ export default function Home() {
       {/* ---------- Join-code scoreboard tile ---------- */}
       <section id="join-code" className="border-t border-border px-6 py-20 sm:py-24">
         <div className="mx-auto flex max-w-lg flex-col items-center text-center">
-          <h2 className="font-display text-2xl font-semibold uppercase tracking-wide text-ink sm:text-3xl">
+          <h2 className="font-display text-2xl font-bold uppercase tracking-wide text-ink sm:text-3xl">
             Every team gets a code
           </h2>
           <p className="mt-3 font-body text-base text-muted">
@@ -111,7 +111,7 @@ export default function Home() {
               Team Code
             </p>
             <p className="mt-4 font-mono text-3xl font-bold tracking-[0.08em] text-accent sm:text-4xl">
-              ALB-AGGIES-24
+              OAK-FAM-7K2Q
             </p>
           </div>
         </div>

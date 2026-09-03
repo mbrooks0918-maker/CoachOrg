@@ -1,17 +1,32 @@
 {
   "id": "/",
-  "name": "CoachOrg",
-  "short_name": "CoachOrg",
-  "description": "Roster, messages, equipment, and game day in one simple app for coaches.",
+  "name": "TeamOps",
+  "short_name": "TeamOps",
+  "description": "Registration, roster, equipment and game day for the people who run youth sport.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0e0e0f",
-  "theme_color": "#0e0e0f",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

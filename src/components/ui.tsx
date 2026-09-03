@@ -4,6 +4,29 @@ import type {
   ReactNode,
   TextareaHTMLAttributes,
 } from 'react'
+import { BackLink } from './BackLink'
+import { Wordmark } from './brand'
+
+/**
+ * The bar every standalone page wears: a step back on the left, the way home
+ * on the right. They are not the same job -- back returns you a step, the
+ * wordmark returns you to the start -- so both are here rather than one
+ * standing in for the other.
+ */
+export function TopBar({
+  backTo = '/',
+  backLabel = 'Back',
+}: {
+  backTo?: string
+  backLabel?: string
+}) {
+  return (
+    <div className="mb-8 flex items-center justify-between gap-4">
+      <BackLink fallback={backTo} label={backLabel} />
+      <Wordmark size="sm" />
+    </div>
+  )
+}
 
 /** Centred single-column shell used by every form page. */
 export function FormShell({
@@ -11,15 +34,18 @@ export function FormShell({
   subtitle,
   children,
   footer,
+  backTo = '/',
 }: {
   title: string
   subtitle?: string
   children: ReactNode
   footer?: ReactNode
+  backTo?: string
 }) {
   return (
     <main className="flex min-h-svh flex-col items-center justify-center px-6 py-16">
       <div className="w-full max-w-md">
+        <TopBar backTo={backTo} />
         <h1 className="font-display text-4xl font-bold uppercase tracking-tight text-ink sm:text-5xl">
           {title}
         </h1>
@@ -90,8 +116,8 @@ export function Button({ variant = 'primary', className = '', ...props }: Button
     'inline-flex w-full items-center justify-center rounded-lg px-6 py-3.5 font-body text-base font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:cursor-not-allowed disabled:opacity-50'
   const look =
     variant === 'primary'
-      ? 'bg-accent text-ink hover:brightness-110'
-      : 'border-2 border-accent bg-transparent text-ink hover:bg-accent/15'
+      ? 'bg-accent text-bg hover:brightness-110'
+      : 'border-2 border-accent bg-transparent text-accent hover:bg-accent/10'
   return <button {...props} className={`${base} ${look} ${className}`} />
 }
 
@@ -101,14 +127,14 @@ export function ErrorNote({ children }: { children: ReactNode }) {
   return (
     <p
       role="alert"
-      className="rounded-lg border border-accent/40 bg-accent/10 px-4 py-3 font-body text-sm text-ink"
+      className="rounded-lg border border-danger/40 bg-danger/10 px-4 py-3 font-body text-sm text-ink"
     >
       {children}
     </p>
   )
 }
 
-/** Scoreboard tile — the same treatment the marketing page uses. */
+/** Code tile — the same treatment the marketing page uses. */
 export function CodeTile({
   label,
   blurb,
@@ -119,7 +145,7 @@ export function CodeTile({
   code: string
 }) {
   return (
-    <div className="rounded-xl border-2 border-accent bg-surface px-5 py-6 text-center shadow-[0_0_60px_-24px] shadow-accent">
+    <div className="rounded-xl border border-accent/60 bg-surface px-5 py-6 text-center">
       <p className="font-body text-[0.7rem] font-medium uppercase tracking-[0.3em] text-muted">
         {label}
       </p>

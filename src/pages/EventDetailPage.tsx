@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { EventChecklist } from '../components/EventChecklist'
 import { EventFields, type EventFormValues } from '../components/EventForm'
 import { MemberPicker } from '../components/MemberPicker'
+import { BackLink } from '../components/BackLink'
 import { Button, ErrorNote } from '../components/ui'
 import { useProgram } from '../lib/programContext'
 import { ROLE_LABEL, isStaff, type Member } from '../lib/roster'
@@ -64,7 +65,7 @@ export default function EventDetailPage() {
   if (!event) {
     return (
       <div>
-        <BackLink />
+        <BackLink fallback={`/program/${program.id}/game-day`} label="All events" />
         <ErrorNote>{error || 'Event not found.'}</ErrorNote>
       </div>
     )
@@ -84,7 +85,7 @@ export default function EventDetailPage() {
 
   return (
     <div>
-      <BackLink />
+      <BackLink fallback={`/program/${program.id}/game-day`} label="All events" />
 
       {editing ? (
         <EditEventForm
@@ -277,18 +278,6 @@ function EditEventForm({
         {busy ? 'Saving…' : 'Save Changes'}
       </Button>
     </form>
-  )
-}
-
-function BackLink() {
-  return (
-    <Link
-      to=".."
-      relative="path"
-      className="font-body text-sm text-muted underline underline-offset-4 transition hover:text-ink"
-    >
-      ← All events
-    </Link>
   )
 }
 

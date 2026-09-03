@@ -44,7 +44,7 @@ export function NotificationToggle() {
           Turn on notifications
         </h3>
         <p className="mt-1 font-body text-sm text-muted">
-          On iPhone and iPad, add CoachOrg to your Home Screen first. Notifications only
+          On iPhone and iPad, add TeamOps to your Home Screen first. Notifications only
           work from there.
         </p>
         <ol className="mt-4 space-y-2 font-body text-sm text-ink">
@@ -57,7 +57,7 @@ export function NotificationToggle() {
             <span className="font-semibold">Add to Home Screen</span>.
           </li>
           <li>
-            <span className="font-semibold text-accent">3.</span> Open CoachOrg from your Home
+            <span className="font-semibold text-accent">3.</span> Open TeamOps from your Home
             Screen and come back to this page.
           </li>
         </ol>

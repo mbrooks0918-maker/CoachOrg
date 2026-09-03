@@ -1,9 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="CoachOrg">
-  <rect width="512" height="512" rx="112" fill="#c8102e"/>
-  <g transform="translate(6 -9)">
-    <circle cx="356" cy="196" r="35" fill="none" stroke="#f2f0ea" stroke-width="20"/>
-    <rect x="96" y="254" width="154" height="68" rx="34" fill="#f2f0ea"/>
-    <circle cx="296" cy="290" r="92" fill="#f2f0ea"/>
-    <circle cx="296" cy="290" r="36" fill="#c8102e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="TeamOps">
+  <rect width="512" height="512" rx="112" fill="#f5a524"/>
+  <g transform="translate(88 88) scale(14)" fill="none" stroke="#0b0d10" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="18" r="2.6" fill="#0b0d10" stroke="none"/>
+    <path d="M7.7 16.3 17 7"/>
+    <path d="M11.4 7H17v5.6"/>
   </g>
 </svg>

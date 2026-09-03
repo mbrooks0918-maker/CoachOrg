@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
-import { Button, ErrorNote, Field, TextArea } from '../components/ui'
+import { Button, ErrorNote, Field, TextArea, TopBar } from '../components/ui'
 import { supabase } from '../lib/supabaseClient'
 import {
   bracketLabel,
@@ -14,7 +14,7 @@ import {
 } from '../lib/registration'
 
 /**
- * The public sign-up form. The only screen in CoachOrg a stranger can open.
+ * The public sign-up form. The only screen in TeamOps a stranger can open.
  *
  * Anyone may read the season and fill the form in; finishing requires an
  * account, because a registration nobody owns cannot be looked after -- the
@@ -417,10 +417,18 @@ export default function RegisterPublic() {
 
 // ------------------------------------------------------------------ pieces
 
+/**
+ * Public pages carry the same bar as the rest of the app. A parent following a
+ * link from their rec centre has no navigation of any kind otherwise -- and on
+ * a Home Screen launch there is no browser chrome either.
+ */
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-svh px-6 py-14">
-      <div className="mx-auto w-full max-w-xl">{children}</div>
+      <div className="mx-auto w-full max-w-xl">
+        <TopBar />
+        {children}
+      </div>
     </main>
   )
 }

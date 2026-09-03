@@ -1,23 +1,55 @@
 @import "tailwindcss";
 
+/*
+ * TeamOps.
+ *
+ * The old skin was Albertville's: a warm, red-tinted black with Aggies red as
+ * the accent, chosen when one high school was the whole product. TeamOps runs
+ * parks and clubs that have their own colours, so wearing one customer's is
+ * both wrong and a problem waiting to happen. This palette is deliberately not
+ * anybody's team colours.
+ *
+ * The neutrals are biased cool -- a blue-grey graphite rather than a warm or a
+ * flat mid-grey -- so the app reads as an instrument rather than a clubhouse.
+ * The accent is scoreboard amber: the colour of a stadium bulb and a marshal's
+ * vest, specific to the world the product lives in, and far enough from red,
+ * blue and green that no customer's kit will clash with it.
+ *
+ * accent is now brand only. It used to double as the error colour, which meant
+ * a form error and a call to action looked the same; danger and good are their
+ * own tokens so state reads as state.
+ */
+
 @theme {
   /* ---- Surfaces ---- */
-  --color-bg: #0e0e0f;      /* near-black, page background */
-  --color-surface: #1a1516; /* cards / panels, warm red undertone */
-  --color-border: #2a2223;  /* borders / dividers */
+  --color-bg: #0b0d10;      /* cool near-black, page background */
+  --color-surface: #14171c; /* cards / panels */
+  --color-raised: #1b1f26;  /* panels sitting on panels */
+  --color-border: #242a33;  /* borders / dividers */
 
   /* ---- Text ---- */
-  --color-ink: #f2f0ea;     /* text primary, warm off-white */
-  --color-muted: #9a9294;   /* text muted */
+  --color-ink: #eef1f5;     /* text primary, cool off-white */
+  --color-muted: #8b95a3;   /* text muted */
 
   /* ---- Brand ---- */
-  --color-accent: #c8102e;  /* Aggies red, primary / CTA */
+  --color-accent: #f5a524;  /* scoreboard amber, primary / CTA */
 
-  /* ---- Type ---- */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Oswald", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Space Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* ---- State ---- */
+  --color-danger: #e5484d;  /* errors, destructive actions */
+  --color-good: #3dd68c;    /* confirmed, done, in good standing */
+
+  /* ---- Type ----
+   * Archivo: an industrial grotesque. Sturdy at heavy weights without the
+   *   sports-poster condensed look Oswald was giving every heading.
+   * Instrument Sans: a body face with some character left in it, which Inter
+   *   deliberately has none of.
+   * JetBrains Mono: join codes get read aloud across a car park, so the mono
+   *   face is the one that keeps 0/O and 1/l/I apart.
+   */
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-body: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Archivo", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 @layer base {

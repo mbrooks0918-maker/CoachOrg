@@ -18,6 +18,7 @@ import EventDetailPage from './pages/EventDetailPage'
 import RegistrationPage from './pages/RegistrationPage'
 import RegisterPublic from './pages/RegisterPublic'
 import OrgOverview from './pages/OrgOverview'
+import { BuildBadge } from './components/BuildBadge'
 
 /**
  * Waits for the initial session check before deciding. Without the `loading`
@@ -42,7 +43,8 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
@@ -99,7 +101,10 @@ export default function App() {
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="registration" element={<RegistrationPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      {/* Outside Routes on purpose: every screen, signed in or not. */}
+      <BuildBadge />
+    </>
   )
 }

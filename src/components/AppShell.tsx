@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { ProgramContext, type Program } from '../lib/programContext'
 import { loadProgramFeatures, type Feature } from '../lib/features'
+import { Wordmark } from './brand'
 import { isOrgLeader } from '../lib/orgOverview'
 import { visibleNav } from '../lib/navSections'
 
@@ -107,14 +108,14 @@ export default function AppShell() {
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
+          <div className="border-b border-border px-6 py-5">
+            <Wordmark />
+          </div>
           <Link
             to=""
-            className="block border-b border-border px-6 py-6 transition hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+            className="block border-b border-border px-6 py-5 transition hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
           >
-            <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
-              CoachOrg
-            </p>
-            <p className="mt-2 font-display text-xl font-bold uppercase leading-tight tracking-tight text-ink">
+            <p className="font-display text-xl font-bold uppercase leading-tight tracking-tight text-ink">
               {program.name}
             </p>
             <p className="mt-1 font-body text-xs uppercase tracking-wider text-muted">
@@ -155,7 +156,19 @@ export default function AppShell() {
         {/* ---- Content ---- */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Mobile header: the sidebar carries this on desktop. */}
-          <header className="flex items-start justify-between gap-4 border-b border-border px-6 py-5 lg:hidden">
+          <header className="border-b border-border px-6 py-4 lg:hidden">
+            <div className="flex items-center justify-between gap-4">
+              <Wordmark size="sm" />
+              {orgLeader && (
+                <Link
+                  to={`/org/${program.organization_id}`}
+                  className="font-body text-[0.7rem] uppercase tracking-wider text-muted transition hover:text-accent"
+                >
+                  Overview
+                </Link>
+              )}
+            </div>
+            <div className="mt-3 flex items-start justify-between gap-4">
             <Link to="" className="min-w-0 focus-visible:outline-none">
               <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
                 {program.sport}
@@ -172,6 +185,7 @@ export default function AppShell() {
             >
               Sign out
             </button>
+            </div>
           </header>
 
           {/* pb leaves room for the tab bar, which is fixed over the page. */}
@@ -183,7 +197,14 @@ export default function AppShell() {
         </div>
 
         {/* ---- Bottom tabs, mobile only ---- */}
-        <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+        {/* Columns follow the sections on offer: hard-coding five wrapped the
+            sixth onto a row of its own the moment registration was unlocked. */}
+        <nav
+          className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+          style={{
+            gridTemplateColumns: `repeat(${visibleNav(features).length}, minmax(0, 1fr))`,
+          }}
+        >
           {visibleNav(features).map(({ to, short, Icon }) => (
             <NavLink key={to} to={to} className={tabLink}>
               <Icon />
