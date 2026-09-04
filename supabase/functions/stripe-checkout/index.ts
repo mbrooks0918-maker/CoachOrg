@@ -32,20 +32,43 @@ const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
 const APP_URL = Deno.env.get('APP_URL') ?? 'https://coach-org.vercel.app'
 const ALLOW_LIVE = Deno.env.get('STRIPE_ALLOW_LIVE') === 'true'
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+/**
+ * CORS, reflecting whatever the browser asked to send.
+ *
+ * A fixed allow-list was wrong here and failed silently in the worst way: the
+ * supabase-js client sends apikey and x-client-info alongside authorization,
+ * the preflight allowed only two of the four, so the browser refused to send
+ * the POST at all. The function was never invoked, and every specific error it
+ * was written to return -- including Stripe's -- was replaced by a generic
+ * "failed to send a request".
+ *
+ * Reflecting the requested headers means a header the client adds tomorrow
+ * cannot resurrect that bug. It is safe with Allow-Origin *: this endpoint
+ * carries no cookies, and its authentication is a bearer token that another
+ * origin cannot read out of this one.
+ */
+function cors(req: Request): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers':
+      req.headers.get('Access-Control-Request-Headers') ??
+      'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400',
+  }
 }
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...CORS },
-  })
+function jsonWith(headers: Record<string, string>) {
+  return (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { 'Content-Type': 'application/json', ...headers },
+    })
 }
 
 Deno.serve(async (req) => {
+  const CORS = cors(req)
+  const json = jsonWith(CORS)
   try {
 
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })

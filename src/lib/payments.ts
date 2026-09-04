@@ -21,6 +21,34 @@ export type ConnectStatus = {
   requirements?: { currently_due?: string[]; disabled_reason?: string | null } | null
 }
 
+/**
+ * The real reason, out of a failed function call.
+ *
+ * supabase-js hands back a FunctionsHttpError on any non-2xx and sets data to
+ * null -- the response body lives on error.context, not in data. Reading data
+ * therefore always found nothing, and every specific message these functions
+ * were written to return arrived as "Edge Function returned a non-2xx status
+ * code". Stripe's errors are the useful ones and this is what lets them
+ * through.
+ */
+async function reasonFrom(error: unknown, fallback: string): Promise<string> {
+  const context = (error as { context?: unknown }).context
+  if (context instanceof Response) {
+    try {
+      const body = await context.clone().json()
+      if (typeof body?.error === 'string') return body.error
+    } catch {
+      try {
+        const text = await context.clone().text()
+        if (text) return text.slice(0, 400)
+      } catch {
+        // fall through to the generic message
+      }
+    }
+  }
+  return fallback
+}
+
 async function callConnect(
   action: 'create_link' | 'refresh_status',
   organizationId: string,
@@ -30,10 +58,7 @@ async function callConnect(
   })
 
   if (error) {
-    // Edge functions return their detail in the body even on a non-2xx, and
-    // Stripe's own message is the one worth showing.
-    const detail = (data as { error?: string } | null)?.error
-    return { ok: false, message: detail ?? error.message }
+    return { ok: false, message: await reasonFrom(error, error.message) }
   }
   if ((data as { error?: string })?.error) {
     return { ok: false, message: (data as { error: string }).error }
@@ -74,8 +99,7 @@ export async function startCheckout(
   })
 
   if (error) {
-    const detail = (data as { error?: string } | null)?.error
-    return { ok: false, message: detail ?? error.message }
+    return { ok: false, message: await reasonFrom(error, error.message) }
   }
   if ((data as { error?: string })?.error) {
     return { ok: false, message: (data as { error: string }).error }
