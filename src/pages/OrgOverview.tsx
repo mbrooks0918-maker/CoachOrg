@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { PaymentsPanel } from '../components/PaymentsPanel'
 import { TopBar } from '../components/ui'
 import {
   byDay,
@@ -139,6 +140,9 @@ export default function OrgOverview() {
           </div>
         )}
       </Section>
+
+      {/* ---------------------------------------------------------- payments */}
+      <PaymentsPanel organizationId={overview.organization.id} />
 
       {/* --------------------------------------------------------- equipment */}
       <Section title="Equipment">

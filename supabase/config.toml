@@ -417,3 +417,10 @@ enabled = true
 # logged-in user, so there is no user JWT to verify. The function does its own
 # authorization check before touching the queue.
 verify_jwt = false
+
+# Stripe cannot present a Supabase JWT, so the endpoint must be reachable
+# without one. Its authentication is the Stripe signature, verified inside the
+# function against STRIPE_WEBHOOK_SECRET -- which is why that function refuses
+# to process anything at all when the secret is absent.
+[functions.stripe-webhook]
+verify_jwt = false

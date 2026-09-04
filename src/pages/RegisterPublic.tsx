@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthProvider'
 import { Button, ErrorNote, Field, TextArea, TopBar } from '../components/ui'
 import { supabase } from '../lib/supabaseClient'
+import { money, startCheckout } from '../lib/payments'
 import {
   bracketLabel,
   loadMyChildren,
@@ -55,6 +56,7 @@ export default function RegisterPublic() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState<SubmitResult | null>(null)
+  const [payError, setPayError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -84,6 +86,18 @@ export default function RegisterPublic() {
     }
   }, [session, season])
 
+  const pay = useCallback(async (registrationId: string) => {
+    setPayError('')
+    const result = await startCheckout(registrationId)
+    if (!result.ok || !result.url) {
+      setPayError(result.message)
+      return
+    }
+    // Stripe's hosted page. No card details, and no Stripe key, ever reach
+    // this bundle.
+    window.location.href = result.url
+  }, [])
+
   const finish = useCallback(async () => {
     if (!season) return
     setBusy(true)
@@ -106,7 +120,9 @@ export default function RegisterPublic() {
       return
     }
     setDone(result.result ?? null)
+    if (result.result?.requires_payment) await pay(result.result.registration_id)
   }, [
+    pay,
     season, token, parentName, parentPhone, personId, childName, birthdate,
     emergencyName, emergencyPhone, medicalNotes, answers,
   ])
@@ -169,6 +185,40 @@ export default function RegisterPublic() {
     )
   }
 
+  if (done?.requires_payment) {
+    return (
+      <Shell>
+        <p className="font-body text-xs font-medium uppercase tracking-[0.3em] text-accent">
+          One step left
+        </p>
+        <h1 className="mt-4 font-display text-4xl font-bold uppercase tracking-tight text-ink">
+          Hold {done.child_name.split(' ')[0]}&rsquo;s place
+        </h1>
+        <p className="mt-4 font-body text-base text-muted">
+          {done.season_name} costs{' '}
+          <span className="text-ink">
+            {money(done.amount_cents ?? 0, done.currency ?? 'usd')}
+          </span>
+          . The place is held while you pay, and the registration is only finished once the
+          payment goes through.
+        </p>
+
+        <div className="mt-6">
+          <ErrorNote>{payError}</ErrorNote>
+        </div>
+
+        <div className="mt-6 sm:w-auto">
+          <Button onClick={() => pay(done.registration_id)}>
+            {payError ? 'Try paying again' : 'Continue to payment'}
+          </Button>
+        </div>
+        <p className="mt-4 font-body text-xs text-muted">
+          Payment is handled by Stripe. Your card details never reach {'\u0054'}eamOps.
+        </p>
+      </Shell>
+    )
+  }
+
   if (done) {
     return (
       <Shell>
@@ -223,6 +273,7 @@ export default function RegisterPublic() {
 
       <div className="mt-6 flex flex-wrap gap-2">
         {bracket && <Chip>{bracket}</Chip>}
+        {season.fee_cents ? <Chip>{money(season.fee_cents)} to register</Chip> : null}
         {season.spots_remaining !== null && (
           <Chip>
             {season.spots_remaining > 0
@@ -407,7 +458,9 @@ export default function RegisterPublic() {
               ? 'Registering…'
               : season.spots_remaining === 0
                 ? 'Join the waiting list'
-                : 'Register'}
+                : season.fee_cents
+                  ? `Register & pay ${money(season.fee_cents)}`
+                  : 'Register'}
           </Button>
         </form>
       )}

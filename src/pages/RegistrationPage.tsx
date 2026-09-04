@@ -158,6 +158,9 @@ function SeasonForm({
   const [minAge, setMinAge] = useState(season?.min_age?.toString() ?? '')
   const [maxAge, setMaxAge] = useState(season?.max_age?.toString() ?? '')
   const [ageAsOf, setAgeAsOf] = useState(season?.age_as_of ?? '')
+  const [fee, setFee] = useState(
+    season?.fee_cents != null ? (season.fee_cents / 100).toFixed(2) : '',
+  )
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -176,6 +179,7 @@ function SeasonForm({
       min_age: minAge ? Number(minAge) : null,
       max_age: maxAge ? Number(maxAge) : null,
       age_as_of: ageAsOf || null,
+      fee_cents: fee.trim() ? Math.round(Number(fee) * 100) : null,
     })
     setBusy(false)
     if (!result.ok || !result.season) {
@@ -210,6 +214,7 @@ function SeasonForm({
         <Field label="Youngest age" name="minAge" type="number" min={0} value={minAge} onChange={(e) => setMinAge(e.target.value)} placeholder="Any" />
         <Field label="Oldest age" name="maxAge" type="number" min={0} value={maxAge} onChange={(e) => setMaxAge(e.target.value)} placeholder="Any" />
         <Field label="Ages measured on" name="ageAsOf" type="date" value={ageAsOf} onChange={(e) => setAgeAsOf(e.target.value)} hint="Defaults to the season start." />
+        <Field label="Registration fee" name="fee" type="number" min={0} step="0.01" value={fee} onChange={(e) => setFee(e.target.value)} placeholder="Leave blank for free" hint="Charged when a family signs up. Needs Stripe connected." />
       </div>
 
       <div className="mt-4"><ErrorNote>{error}</ErrorNote></div>

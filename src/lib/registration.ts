@@ -22,6 +22,8 @@ export type Season = {
   max_age: number | null
   age_as_of: string | null
   public_token: string
+  fee_cents: number | null
+  currency: string
 }
 
 export type SeasonQuestion = {
@@ -45,6 +47,7 @@ export type Registration = {
 
 /** What a stranger is allowed to see about a season. */
 export type PublicSeason = {
+  fee_cents: number | null
   season_id: string
   organization_id: string
   organization_name: string
@@ -65,7 +68,7 @@ export type PublicSeason = {
 }
 
 const SEASON_FIELDS =
-  'id, program_id, name, starts_on, ends_on, registration_opens_at, registration_closes_at, capacity, min_age, max_age, age_as_of, public_token'
+  'id, program_id, name, starts_on, ends_on, registration_opens_at, registration_closes_at, capacity, min_age, max_age, age_as_of, public_token, fee_cents, currency'
 
 // ------------------------------------------------------------------- staff
 
@@ -92,6 +95,7 @@ export async function saveSeason(
     min_age: season.min_age ?? null,
     max_age: season.max_age ?? null,
     age_as_of: season.age_as_of || null,
+    fee_cents: season.fee_cents ?? null,
   }
 
   const query = season.id
@@ -204,7 +208,10 @@ export type SubmitInput = {
 
 export type SubmitResult = {
   registration_id: string
-  status: 'confirmed' | 'waitlisted'
+  status: 'confirmed' | 'waitlisted' | 'pending_payment'
+  requires_payment?: boolean
+  amount_cents?: number | null
+  currency?: string
   waitlist_rank: number | null
   child_name: string
   season_name: string
