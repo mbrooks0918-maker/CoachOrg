@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Button, ErrorNote, Field, TextArea } from './ui'
+import { Button, EmptyState, ErrorNote, Field, TextArea } from './ui'
+import { RosterIcon } from './navItems'
 import { useProgram } from '../lib/programContext'
 import { isStaff, type Member } from '../lib/roster'
 import {
@@ -120,11 +121,17 @@ export function Announcements({
       {notice && !composing && <p className="mt-3 font-body text-sm text-good">{notice}</p>}
 
       {items.length === 0 ? (
-        <p className="mt-3 rounded-lg border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-          {staff
-            ? 'Nothing posted yet. Anything you post here reaches every family on the roster.'
-            : 'Nothing from your coaches yet.'}
-        </p>
+        <div className="mt-3">
+          <EmptyState
+            Icon={RosterIcon}
+            title={staff ? 'Nothing posted yet' : 'No news yet'}
+            line={
+              staff
+                ? 'Anything you post reaches every family on the roster and sends them a notification.'
+                : 'Team news and changes from your coaches show up here, and you get a notification when they do.'
+            }
+          />
+        </div>
       ) : (
         <ul className="mt-3 space-y-3">
           {items.map((a) => (
@@ -244,7 +251,7 @@ function Composer({
   const [busy, setBusy] = useState(false)
 
   return (
-    <div className="mt-3 rounded-xl border border-border bg-surface px-5 py-5">
+    <div className="mt-3 rounded-xl border border-border bg-surface p-5">
       <Field
         label="Title"
         name="title"

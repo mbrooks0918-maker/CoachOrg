@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button, ErrorNote } from '../components/ui'
+import { Button, EmptyState, ErrorNote } from '../components/ui'
+import { GameDayIcon } from '../components/navItems'
 import { EventFields, type EventFormValues } from '../components/EventForm'
 import { useProgram } from '../lib/programContext'
 import { isStaff } from '../lib/roster'
@@ -68,7 +69,13 @@ export default function GameDayPage() {
 
       {staff && <NewEventForm programId={program.id} onCreated={(e) => setEvents((c) => [...c, e].sort((a, b) => a.starts_at.localeCompare(b.starts_at)))} />}
 
-      <EventList title="Upcoming" events={upcoming} myRoles={myRoles} empty={staff ? 'Nothing scheduled yet. Add your first game above.' : 'No games scheduled yet.'} />
+      <EventList title="Upcoming" events={upcoming} myRoles={myRoles} empty={
+          staff
+            ? 'Add a game and it gets its own to-do list, kit list and volunteer jobs.'
+            : 'Once your coach adds a fixture you will see the time, the place and what to bring.'
+        }
+        emptyTitle="No games scheduled"
+        EmptyIcon={GameDayIcon} />
       {past.length > 0 && <EventList title="Past" events={past} myRoles={myRoles} empty="" />}
     </div>
   )
@@ -78,12 +85,16 @@ function EventList({
   title,
   events,
   myRoles,
+  emptyTitle,
+  EmptyIcon,
   empty,
 }: {
   title: string
   events: EventRow[]
   myRoles: Map<string, string[]>
   empty: string
+  emptyTitle?: string
+  EmptyIcon?: (props: { size?: number }) => React.ReactNode
 }) {
   return (
     <section className="mt-10">
@@ -93,7 +104,11 @@ function EventList({
       </h3>
 
       {events.length === 0 ? (
-        <p className="mt-3 font-body text-sm text-muted/70">{empty}</p>
+        emptyTitle ? (
+          <div className="mt-3">
+            <EmptyState Icon={EmptyIcon} title={emptyTitle} line={empty} />
+          </div>
+        ) : null
       ) : (
         <ul className="mt-3 space-y-3">
           {events.map((event) => {
@@ -197,7 +212,7 @@ function NewEventForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-5 rounded-xl border border-border bg-surface px-5 py-6">
+    <form onSubmit={handleSubmit} className="mt-6 space-y-5 rounded-xl border border-border bg-surface p-5">
       <div className="flex items-baseline justify-between gap-4">
         <h3 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
           New event

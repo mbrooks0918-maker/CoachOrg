@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Button, ErrorNote, Field } from '../components/ui'
+import { Button, EmptyState, ErrorNote, Field } from '../components/ui'
+import { RegistrationIcon } from '../components/navItems'
 import { useProgram } from '../lib/programContext'
 import { isStaff } from '../lib/roster'
 import {
@@ -93,10 +94,13 @@ export default function RegistrationPage() {
       )}
 
       {seasons.length === 0 ? (
-        <p className="mt-6 rounded-lg border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-          No seasons yet. Create one, give it a registration window, and you will get a link to
-          share.
-        </p>
+        <div className="mt-6">
+          <EmptyState
+            Icon={RegistrationIcon}
+            title="No seasons yet"
+            line="Create one and give it a registration window. You get a link to share, and families who use it land straight on your roster."
+          />
+        </div>
       ) : (
         <>
           <div className="mt-6 flex flex-wrap gap-2">
@@ -190,7 +194,7 @@ function SeasonForm({
   }
 
   return (
-    <form onSubmit={handleSave} className="mt-6 rounded-xl border border-border bg-surface px-5 py-6">
+    <form onSubmit={handleSave} className="mt-6 rounded-xl border border-border bg-surface p-5">
       <div className="flex items-baseline justify-between gap-4">
         <h3 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
           {season ? 'Edit season' : 'New season'}
@@ -277,7 +281,7 @@ function SeasonDetail({
 
   return (
     <div className="mt-8 space-y-8">
-      <section className="rounded-xl border border-border bg-surface px-5 py-5">
+      <section className="rounded-xl border border-border bg-surface p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h3 className="font-display text-lg font-semibold uppercase tracking-wide text-ink">
             {season.name}
@@ -358,7 +362,19 @@ function RegistrationList({
   const [error, setError] = useState('')
 
   if (rows.length === 0) {
-    return <p className="mt-3 font-body text-sm text-muted/70">Nobody yet.</p>
+    return (
+      <div className="mt-3">
+        <EmptyState
+          Icon={waitlist ? undefined : RegistrationIcon}
+          title={waitlist ? 'Nobody waiting' : 'No sign-ups yet'}
+          line={
+            waitlist
+              ? 'Once the season fills, the next family to sign up waits here until a place opens.'
+              : 'Share the link above. Families appear here as they complete the form, and you can withdraw anyone who drops out.'
+          }
+        />
+      </div>
+    )
   }
 
   async function act(id: string, action: 'confirm' | 'withdraw') {
@@ -449,7 +465,7 @@ function QuestionEditor({
       </div>
 
       {open && (
-        <div className="mt-3 rounded-xl border border-border bg-surface px-5 py-5">
+        <div className="mt-3 rounded-xl border border-border bg-surface p-5">
           <Field label="Question" name="prompt" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="What size shirt does your player wear?" />
           <div className="mt-4 flex flex-wrap gap-2">
             {(['text', 'boolean', 'choice'] as const).map((k) => (

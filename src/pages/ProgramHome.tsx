@@ -124,7 +124,7 @@ export default function ProgramHome() {
       {orgLeader && (
         <Link
           to={`/org/${program.organization_id}`}
-          className="mt-6 flex items-center justify-between rounded-xl border border-border bg-surface px-5 py-4 transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface p-5 transition hover:border-accent hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <span>
             <span className="block font-body text-[0.65rem] font-medium uppercase tracking-[0.25em] text-muted">
@@ -141,7 +141,7 @@ export default function ProgramHome() {
       )}
 
       {/* Two across even on a phone: four large targets without scrolling. */}
-      <div className="mt-8 grid grid-cols-2 gap-4">
+      <div className="mt-6 grid grid-cols-2 gap-4">
         {sections.map(({ to, Icon }, index) => {
           const { title, line } = describe(to)
           // With an odd number of sections the last tile takes the full row
@@ -151,19 +151,20 @@ export default function ProgramHome() {
             <Link
               key={to}
               to={to}
-              className={`group flex min-h-40 flex-col justify-between rounded-xl border border-border bg-surface px-5 py-5 transition hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:min-h-44 sm:px-6 sm:py-6 ${wide ? 'col-span-2 min-h-32 sm:min-h-36' : ''}`}
+              className={`group flex min-h-36 flex-col justify-between rounded-xl border border-border bg-surface p-5 transition hover:border-accent hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:min-h-40 ${wide ? 'col-span-2 min-h-28 sm:min-h-32' : ''}`}
             >
-              <span className="text-muted transition group-hover:text-accent">
-                <Icon size={28} />
+              {/* The icon sits in a chip rather than floating, which is what
+                  ties the tiles to the empty states and keeps the top edge of
+                  every card at the same optical weight. */}
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-raised text-muted transition group-hover:bg-accent/15 group-hover:text-accent">
+                <Icon size={22} />
               </span>
 
-              <span className="mt-4 block">
-                <span className="block font-display text-base font-semibold uppercase leading-tight tracking-wide text-ink sm:text-lg">
+              <span className="mt-5 block">
+                <span className="block font-display text-base font-semibold uppercase leading-tight tracking-wide text-ink">
                   {title}
                 </span>
-                <span className="mt-1.5 block font-body text-xs text-muted sm:text-sm">
-                  {line}
-                </span>
+                <span className="mt-1 block font-body text-sm text-muted">{line}</span>
               </span>
             </Link>
           )
@@ -174,7 +175,7 @@ export default function ProgramHome() {
       {summary?.nextEvent && (
         <Link
           to={`game-day/${summary.nextEvent.id}`}
-          className="mt-6 block rounded-xl border-2 border-accent bg-surface px-5 py-4 shadow-[0_0_60px_-28px] shadow-accent transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="mt-4 block rounded-xl border border-accent/60 bg-surface p-5 transition hover:border-accent hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <p className="font-body text-[0.7rem] font-medium uppercase tracking-[0.3em] text-muted">
             Next up

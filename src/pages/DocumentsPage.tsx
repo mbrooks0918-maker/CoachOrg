@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, ErrorNote, Field, TextArea } from '../components/ui'
+import { Button, EmptyState, ErrorNote, Field, TextArea } from '../components/ui'
+import { DocumentsIcon } from '../components/navItems'
 import { FilePicker } from '../components/FilePicker'
 import { useProgram } from '../lib/programContext'
 import { isStaff } from '../lib/roster'
@@ -104,9 +105,17 @@ export default function DocumentsPage() {
         ))}
 
       {documents.length === 0 ? (
-        <p className="mt-6 rounded-xl border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-          {staff ? 'Nothing uploaded yet.' : 'Your coaches have not shared anything yet.'}
-        </p>
+        <div className="mt-6">
+          <EmptyState
+            Icon={DocumentsIcon}
+            title={staff ? 'No files yet' : 'Nothing shared yet'}
+            line={
+              staff
+                ? 'Anything you upload here is visible to every family on the roster — schedules, waivers, the season handbook.'
+                : 'Schedules, forms and handbooks from your coaches show up here.'
+            }
+          />
+        </div>
       ) : (
         <div className="mt-8 space-y-8">
           {categories.map((category) => (
@@ -202,7 +211,7 @@ function UploadForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-6 space-y-5 rounded-xl border border-border bg-surface px-5 py-6"
+      className="mt-6 space-y-5 rounded-xl border border-border bg-surface p-5"
     >
       <div className="flex items-baseline justify-between gap-4">
         <h3 className="font-display text-base font-semibold uppercase tracking-wide text-ink">

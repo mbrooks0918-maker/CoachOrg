@@ -10,7 +10,8 @@ import {
 } from '../lib/playerDocuments'
 import { Announcements } from '../components/Announcements'
 import { MemberPicker } from '../components/MemberPicker'
-import { Button, CodeTile, ErrorNote } from '../components/ui'
+import { Button, CodeTile, EmptyState, ErrorNote } from '../components/ui'
+import { RosterIcon } from '../components/navItems'
 import { CODE_TYPES } from '../lib/codes'
 import { supabase } from '../lib/supabaseClient'
 import {
@@ -128,9 +129,13 @@ export default function RosterPage() {
       )}
 
       {members.length === 0 ? (
-        <p className="mt-6 rounded-lg border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-          Nobody has joined yet. Share a code below to get started.
-        </p>
+        <div className="mt-6">
+          <EmptyState
+            Icon={RosterIcon}
+            title="Nobody has joined yet"
+            line="Share one of the join codes below. Players and families appear here as they sign up, and you can link each child to their parent."
+          />
+        </div>
       ) : (
         <div className="mt-8 space-y-8">
           {groups.map((group) => (
@@ -257,7 +262,7 @@ function LinkTool({
   }
 
   return (
-    <div className="mt-6 rounded-xl border border-border bg-surface px-5 py-6">
+    <div className="mt-6 rounded-xl border border-border bg-surface p-5">
       <div className="flex items-baseline justify-between gap-4">
         <h3 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
           Link family to player

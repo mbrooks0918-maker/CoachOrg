@@ -15,6 +15,7 @@ export default function CreateOrg() {
   const [programName, setProgramName] = useState('')
   const [sport, setSport] = useState('')
   const [error, setError] = useState('')
+  const [coachName, setCoachName] = useState('')
   const [busy, setBusy] = useState(false)
   const [checking, setChecking] = useState(true)
 
@@ -92,7 +93,7 @@ export default function CreateOrg() {
       .from('people')
       .insert({
         organization_id: org.id,
-        full_name: session.user.email?.split('@')[0] ?? 'Head Coach',
+        full_name: coachName.trim(),
         user_id: userId,
       })
       .select('id')
@@ -166,6 +167,15 @@ export default function CreateOrg() {
       subtitle="One organization, one program. You can add more later."
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        <Field
+          label="Your name"
+          name="coachName"
+          required
+          value={coachName}
+          onChange={(e) => setCoachName(e.target.value)}
+          placeholder="Dana Whitlow"
+          hint="How you appear on your own roster."
+        />
         <Field
           label="Organization name"
           name="organization"

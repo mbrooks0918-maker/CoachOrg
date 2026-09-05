@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { EquipmentFields } from '../components/EquipmentFields'
 import { MemberPicker } from '../components/MemberPicker'
-import { Button, ErrorNote } from '../components/ui'
+import { Button, EmptyState, ErrorNote } from '../components/ui'
+import { EquipmentIcon, RosterIcon } from '../components/navItems'
 import { useProgram } from '../lib/programContext'
 import { ROLE_LABEL, isStaff, type Member } from '../lib/roster'
 import {
@@ -237,9 +238,13 @@ function Inventory({
 }) {
   if (items.length === 0) {
     return (
-      <p className="mt-6 rounded-xl border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-        No equipment logged yet. Add your first item above.
-      </p>
+      <div className="mt-6">
+        <EmptyState
+          Icon={EquipmentIcon}
+          title="The cupboard is empty"
+          line="Add an item and you can check it out to a player, then see at a glance who is holding what."
+        />
+      </div>
     )
   }
 
@@ -575,7 +580,7 @@ function ItemForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-6 space-y-5 rounded-xl border border-border bg-surface px-5 py-6"
+      className="mt-6 space-y-5 rounded-xl border border-border bg-surface p-5"
     >
       <div className="flex items-baseline justify-between gap-4">
         <h3 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
@@ -632,9 +637,13 @@ function ByPerson({
 
   if (holders.length === 0) {
     return (
-      <p className="mt-8 rounded-xl border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-        Nobody is holding any equipment right now.
-      </p>
+      <div className="mt-8">
+        <EmptyState
+          Icon={RosterIcon}
+          title="Nobody is holding anything"
+          line="Check an item out to a player and they appear here, with what they have and since when."
+        />
+      </div>
     )
   }
 

@@ -11,7 +11,8 @@ import {
   toLocalInputValue,
   type Reminder,
 } from '../lib/reminders'
-import { Button, ErrorNote, Field, TextArea } from './ui'
+import { Button, EmptyState, ErrorNote, Field, TextArea } from './ui'
+import { TasksIcon } from './navItems'
 
 /**
  * Reminder composer plus the queue for one program.
@@ -98,7 +99,7 @@ export function Reminders({ programId }: { programId: string }) {
 
       <form
         onSubmit={handleSubmit}
-        className="mt-6 space-y-5 rounded-xl border border-border bg-surface px-5 py-6"
+        className="mt-6 space-y-5 rounded-xl border border-border bg-surface p-5"
       >
         <Field
           label="Title"
@@ -171,7 +172,9 @@ export function Reminders({ programId }: { programId: string }) {
           <ReminderList
             title="Scheduled"
             reminders={upcoming}
-            empty="Nothing scheduled yet."
+            empty="Schedule one and it goes out as a notification to everyone you pick, at the time you pick."
+            emptyTitle="Nothing scheduled"
+            EmptyIcon={TasksIcon}
             onCancel={handleCancel}
           />
           {recentlySent.length > 0 && (
@@ -187,11 +190,15 @@ function ReminderList({
   title,
   reminders,
   empty,
+  emptyTitle,
+  EmptyIcon,
   onCancel,
 }: {
   title: string
   reminders: Reminder[]
   empty: string
+  emptyTitle?: string
+  EmptyIcon?: (props: { size?: number }) => React.ReactNode
   onCancel?: (reminder: Reminder) => void
 }) {
   return (
@@ -202,7 +209,11 @@ function ReminderList({
       </h3>
 
       {reminders.length === 0 ? (
-        <p className="mt-3 font-body text-sm text-muted/70">{empty}</p>
+        emptyTitle ? (
+          <div className="mt-3">
+            <EmptyState Icon={EmptyIcon} title={emptyTitle} line={empty} />
+          </div>
+        ) : null
       ) : (
         <ul className="mt-3 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
           {reminders.map((reminder) => (

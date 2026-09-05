@@ -121,6 +121,36 @@ export function Button({ variant = 'primary', className = '', ...props }: Button
   return <button {...props} className={`${base} ${look} ${className}`} />
 }
 
+/**
+ * An empty section, on purpose.
+ *
+ * "Nothing scheduled" on its own reads as a gap where content failed to load.
+ * The useful thing to say is what will be here once there is something, so the
+ * shape has room for that: a muted mark, a plain statement, and a line about
+ * what this section does when it is doing its job.
+ */
+export function EmptyState({
+  Icon,
+  title,
+  line,
+}: {
+  Icon?: (props: { size?: number }) => ReactNode
+  title: string
+  line?: string
+}) {
+  return (
+    <div className="flex flex-col items-center rounded-xl border border-border bg-surface px-6 py-10 text-center">
+      {Icon && (
+        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-raised text-muted/60">
+          <Icon size={24} />
+        </span>
+      )}
+      <p className="font-display text-base font-semibold text-ink">{title}</p>
+      {line && <p className="mt-2 max-w-sm font-body text-sm leading-relaxed text-muted">{line}</p>}
+    </div>
+  )
+}
+
 /** Error surfaced from Supabase or from local validation. */
 export function ErrorNote({ children }: { children: ReactNode }) {
   if (!children) return null

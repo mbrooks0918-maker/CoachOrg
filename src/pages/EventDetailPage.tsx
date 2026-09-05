@@ -251,7 +251,7 @@ function EditEventForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-4 space-y-5 rounded-xl border border-border bg-surface px-5 py-6"
+      className="mt-4 space-y-5 rounded-xl border border-border bg-surface p-5"
     >
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
@@ -393,7 +393,7 @@ function Volunteers({
 
       {staff &&
         (open ? (
-          <div className="mt-4 rounded-xl border border-border bg-surface px-5 py-5">
+          <div className="mt-4 rounded-xl border border-border bg-surface p-5">
             <div className="flex items-baseline justify-between gap-4">
               <h4 className="font-display text-base font-semibold uppercase tracking-wide text-ink">
                 Assign a job
