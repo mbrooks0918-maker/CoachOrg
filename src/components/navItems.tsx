@@ -60,12 +60,20 @@ export const EquipmentIcon = ({ size = 22 }: IconProps) => (
   </svg>
 )
 
-/** A pitch from above: halfway line, centre spot. The mark's own point of view. */
+/**
+ * A pitch from above: touchlines, halfway line, centre circle, centre spot.
+ * The mark's own point of view.
+ *
+ * The centre circle is not decoration. Without it this was a rounded rectangle
+ * with a line through it, which at tab-bar size could as easily have been a
+ * card or a battery -- the circle is the thing that makes it a pitch.
+ */
 export const GameDayIcon = ({ size = 22 }: IconProps) => (
   <svg {...shared(size)}>
-    <rect x="3.4" y="4.6" width="17.2" height="14.8" rx="2.6" />
-    <path d="M3.4 12h17.2" />
-    <circle cx="12" cy="12" r="1.9" fill="currentColor" stroke="none" />
+    <rect x="3.2" y="4.8" width="17.6" height="14.4" rx="2.6" />
+    <path d="M3.2 12h17.6" />
+    <circle cx="12" cy="12" r="3.3" />
+    <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
   </svg>
 )
 
