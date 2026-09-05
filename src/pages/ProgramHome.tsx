@@ -8,10 +8,10 @@ import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/pro
 /**
  * The screen you land on after logging in.
  *
- * Four tiles, one per section, in the same order as the tab bar. Each carries
- * a line describing what that person will find behind it -- which differs by
- * role, because the sections themselves differ by role. No new views: every
- * tile is a link to a screen that already exists.
+ * One tile per section, in the same order as the tab bar, each led by its
+ * icon at full size with the name and a status line captioned underneath.
+ * The status differs by role, because what is behind the tile differs by
+ * role. No new views: every tile is a link to a screen that already exists.
  */
 export default function ProgramHome() {
   const { program, role, memberId, features, orgLeader } = useProgram()
@@ -140,7 +140,13 @@ export default function ProgramHome() {
         </Link>
       )}
 
-      {/* Two across even on a phone: four large targets without scrolling. */}
+      {/* Two across even on a phone: six large targets without scrolling.
+
+          The icon is the tile. It is what the eye lands on and what the thumb
+          aims at, so it is drawn large and centred, with the section name and
+          its status line reading as a caption beneath rather than a headline
+          above. The names are short and the icons are distinct enough to carry
+          recognition on their own once you have used the app twice. */}
       <div className="mt-6 grid grid-cols-2 gap-4">
         {sections.map(({ to, Icon }, index) => {
           const { title, line } = describe(to)
@@ -151,20 +157,28 @@ export default function ProgramHome() {
             <Link
               key={to}
               to={to}
-              className={`group flex min-h-36 flex-col justify-between rounded-xl border border-border bg-surface p-5 transition hover:border-accent hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:min-h-40 ${wide ? 'col-span-2 min-h-28 sm:min-h-32' : ''}`}
+              className={`group flex min-h-44 flex-col items-center gap-4 rounded-xl border border-border bg-surface px-5 pb-6 pt-7 text-center transition hover:border-accent hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:min-h-52 sm:pb-8 sm:pt-9 ${wide ? 'col-span-2 min-h-36 pt-6 sm:min-h-40 sm:pt-7' : ''}`}
             >
-              {/* The icon sits in a chip rather than floating, which is what
-                  ties the tiles to the empty states and keeps the top edge of
-                  every card at the same optical weight. */}
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-raised text-muted transition group-hover:bg-accent/15 group-hover:text-accent">
-                <Icon size={22} />
+              {/* The circle is kept, and grown with the icon: the mark itself
+                  is dots ringing a space, so a round chip is the tile echoing
+                  the logo rather than decorating it. Turf at rest, deeper on
+                  hover -- the icon is the colour in the layout now, so leaving
+                  it grey would flatten the whole grid.
+
+                  Held at a fixed distance from the top rather than centred in
+                  the tile, because "Roster & Comms" wraps to two lines where
+                  "Equipment" does not, and centring pushed the two icons in a
+                  row out of line with each other. The icon is the thing being
+                  aimed at, so the icon is what stays aligned. */}
+              <span className="flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full bg-accent/10 text-accent transition group-hover:bg-accent/20 [&>svg]:h-9 [&>svg]:w-9 sm:h-20 sm:w-20 sm:[&>svg]:h-10 sm:[&>svg]:w-10">
+                <Icon />
               </span>
 
-              <span className="mt-5 block">
-                <span className="block font-display text-base font-semibold uppercase leading-tight tracking-wide text-ink">
+              <span className="block">
+                <span className="block font-display text-sm font-semibold uppercase leading-tight tracking-wide text-ink">
                   {title}
                 </span>
-                <span className="mt-1 block font-body text-sm text-muted">{line}</span>
+                <span className="mt-1 block font-body text-xs text-muted">{line}</span>
               </span>
             </Link>
           )
