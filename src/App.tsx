@@ -16,6 +16,7 @@ import ProgramHome from './pages/ProgramHome'
 import DocumentsPage from './pages/DocumentsPage'
 import EventDetailPage from './pages/EventDetailPage'
 import RegistrationPage from './pages/RegistrationPage'
+import ResourcesPage from './pages/ResourcesPage'
 import RegisterPublic from './pages/RegisterPublic'
 import OrgOverview from './pages/OrgOverview'
 import { BuildBadge } from './components/BuildBadge'
@@ -100,6 +101,7 @@ export default function App() {
         <Route path="game-day/:eventId" element={<EventDetailPage />} />
         <Route path="documents" element={<DocumentsPage />} />
         <Route path="registration" element={<RegistrationPage />} />
+        <Route path="resources" element={<ResourcesPage />} />
       </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

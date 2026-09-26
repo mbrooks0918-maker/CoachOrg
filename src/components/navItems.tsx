@@ -94,3 +94,19 @@ export const RegistrationIcon = ({ size = 22 }: IconProps) => (
     <path d="M18.4 13.8v5.2M15.8 16.4h5.2" />
   </svg>
 )
+
+/**
+ * A play button.
+ *
+ * The library is courses and drill video, so the thing you do with a resource
+ * is press play on it. The circle is the mark's own geometry carrying the
+ * icon, and the filled triangle is the dot language doing the pointing. It is
+ * the only plain circle in the set, which is what keeps it legible beside the
+ * pitch at tab-bar size.
+ */
+export const ResourcesIcon = ({ size = 22 }: IconProps) => (
+  <svg {...shared(size)}>
+    <circle cx="12" cy="12" r="8.6" />
+    <path d="M10.3 8.7 16 12l-5.7 3.3Z" fill="currentColor" stroke="none" />
+  </svg>
+)

@@ -4,6 +4,7 @@ import { visibleNav } from '../lib/navSections'
 import { useProgram } from '../lib/programContext'
 import { ROLE_LABEL, isStaff } from '../lib/roster'
 import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/programHome'
+import { RESOURCE_COUNT } from '../lib/resources'
 
 /**
  * The screen you land on after logging in.
@@ -75,6 +76,12 @@ export default function ProgramHome() {
               : 'No sign-ups open',
         }
 
+      case 'resources':
+        return {
+          title: 'Resources',
+          line: `${RESOURCE_COUNT} coaching links`,
+        }
+
       case 'documents':
         return {
           title: 'Documents',
@@ -102,7 +109,7 @@ export default function ProgramHome() {
     }
   }
 
-  const sections = visibleNav(features)
+  const sections = visibleNav(features, staff || orgLeader)
 
   return (
     <div>

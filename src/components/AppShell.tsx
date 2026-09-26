@@ -8,6 +8,7 @@ import { unreadCount } from '../lib/announcements'
 import { rememberLastProgram } from '../lib/lastProgram'
 import { isOrgLeader } from '../lib/orgOverview'
 import { visibleNav } from '../lib/navSections'
+import { isStaff } from '../lib/roster'
 
 /** Belongs to the shell rather than the section list -- it is not a section. */
 const SignOutIcon = () => (
@@ -148,7 +149,7 @@ export default function AppShell() {
           )}
 
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
-            {visibleNav(features).map(({ to, label, Icon }) => (
+            {visibleNav(features, isStaff(role) || orgLeader).map(({ to, label, Icon }) => (
               <NavLink key={to} to={to} className={sidebarLink}>
                 <IconWithBadge Icon={Icon} show={to === 'roster' && unread > 0} />
                 <span>{label}</span>
@@ -218,17 +219,24 @@ export default function AppShell() {
 
         {/* ---- Bottom tabs, mobile only ---- */}
         {/* Columns follow the sections on offer: hard-coding five wrapped the
-            sixth onto a row of its own the moment registration was unlocked. */}
+            sixth onto a row of its own the moment registration was unlocked.
+
+            Seven is the most this bar holds at 375px, which is why the short
+            labels are as short as they are -- "Game Day" and "Sign-ups" each
+            took two lines once Resources arrived, and a tab bar with some
+            icons a line higher than the others looks broken. They never wrap
+            now; if an eighth section is ever added this bar needs rethinking
+            rather than another shortened word. */}
         <nav
           className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
           style={{
-            gridTemplateColumns: `repeat(${visibleNav(features).length}, minmax(0, 1fr))`,
+            gridTemplateColumns: `repeat(${visibleNav(features, isStaff(role) || orgLeader).length}, minmax(0, 1fr))`,
           }}
         >
-          {visibleNav(features).map(({ to, short, Icon }) => (
+          {visibleNav(features, isStaff(role) || orgLeader).map(({ to, short, Icon }) => (
             <NavLink key={to} to={to} className={tabLink}>
               <IconWithBadge Icon={Icon} show={to === 'roster' && unread > 0} />
-              <span className="text-[0.65rem] font-medium uppercase tracking-wider">{short}</span>
+              <span className="whitespace-nowrap text-[0.65rem] font-medium uppercase tracking-wider">{short}</span>
             </NavLink>
           ))}
         </nav>
