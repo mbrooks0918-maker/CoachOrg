@@ -4,7 +4,6 @@ import { visibleNav } from '../lib/navSections'
 import { useProgram } from '../lib/programContext'
 import { ROLE_LABEL, isStaff } from '../lib/roster'
 import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/programHome'
-import { RESOURCE_COUNT } from '../lib/resources'
 
 /**
  * The screen you land on after logging in.
@@ -23,13 +22,13 @@ export default function ProgramHome() {
   useEffect(() => {
     let active = true
     ;(async () => {
-      const result = await loadHomeSummary(program.id, memberId, staff)
+      const result = await loadHomeSummary(program.id, memberId, staff, program.organization_id)
       if (active) setSummary(result)
     })()
     return () => {
       active = false
     }
-  }, [program.id, memberId, staff])
+  }, [program.id, program.organization_id, memberId, staff])
 
   // Each tile gets a headline and a subtitle. Staff and roster differ because
   // what is behind the tile differs; the wording follows the section.
@@ -79,7 +78,7 @@ export default function ProgramHome() {
       case 'resources':
         return {
           title: 'Resources',
-          line: `${RESOURCE_COUNT} coaching links`,
+          line: plural(summary.resourceCount, 'coaching link', 'coaching links'),
         }
 
       case 'documents':

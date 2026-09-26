@@ -21,17 +21,21 @@ export type HomeSummary = {
   documentCount: number
   /** Seasons taking sign-ups right now. Always zero without the feature. */
   openSeasons: number
+  /** Links in the organization's coaching library. Staff-only, so zero otherwise. */
+  resourceCount: number
 }
 
 export async function loadHomeSummary(
   programId: string,
   memberId: string | null,
   staff: boolean,
+  organizationId: string,
 ): Promise<HomeSummary> {
   const nowIso = new Date().toISOString()
 
   const [
     meResult, membersResult, tasksResult, equipmentResult, eventResult, docsResult, seasonsResult,
+    resourcesResult,
   ] = await Promise.all([
     memberId
       ? supabase.from('program_roster').select('display_name').eq('id', memberId).maybeSingle()
@@ -87,6 +91,14 @@ export async function loadHomeSummary(
       .eq('program_id', programId)
       .lte('registration_opens_at', nowIso)
       .gte('registration_closes_at', nowIso),
+
+    // Only staff are shown the tile, so only staff pay for the count.
+    staff
+      ? supabase
+          .from('resources')
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', organizationId)
+      : Promise.resolve({ count: 0 }),
   ])
 
   const nextEvent = eventResult.data?.[0] ?? null
@@ -110,6 +122,7 @@ export async function loadHomeSummary(
     myJobs,
     documentCount: docsResult.count ?? 0,
     openSeasons: seasonsResult.count ?? 0,
+    resourceCount: resourcesResult.count ?? 0,
   }
 }
 
