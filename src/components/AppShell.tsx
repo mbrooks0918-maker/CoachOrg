@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { ProgramContext, type Program } from '../lib/programContext'
+import { ProgramContext, type Program, type ProgramGroup } from '../lib/programContext'
 import { loadProgramFeatures, type Feature } from '../lib/features'
 import { Wordmark } from './brand'
 import { unreadCount } from '../lib/announcements'
@@ -42,6 +42,8 @@ export default function AppShell() {
   const [features, setFeatures] = useState<Feature[]>([])
   const [orgLeader, setOrgLeader] = useState(false)
   const [myPrograms, setMyPrograms] = useState<MyProgram[]>([])
+  const [group, setGroup] = useState<ProgramGroup | null>(null)
+  const [groupAdmin, setGroupAdmin] = useState(false)
   const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -60,7 +62,11 @@ export default function AppShell() {
 
       const [programResult, roleResult, memberResult, featureResult, unreadResult] =
         await Promise.all([
-        supabase.from('programs').select('id, name, sport, organization_id').eq('id', programId).single(),
+        supabase
+          .from('programs')
+          .select('id, name, sport, organization_id, program_group_id')
+          .eq('id', programId)
+          .single(),
         supabase.rpc('program_role', { p_program_id: programId }),
         uid
           ? supabase
@@ -74,6 +80,29 @@ export default function AppShell() {
         unreadCount(programId),
       ])
 
+      // The group this division sits in, and whether the viewer runs it. Only
+      // asked when the program is actually grouped, which almost none are.
+      const groupId = (programResult.data as { program_group_id?: string | null } | null)
+        ?.program_group_id
+      if (groupId) {
+        const [groupRow, adminRow] = await Promise.all([
+          supabase.from('program_groups').select('id, name').eq('id', groupId).maybeSingle(),
+          supabase
+            .from('program_group_admins')
+            .select('id')
+            .eq('program_group_id', groupId)
+            .maybeSingle(),
+        ])
+        if (!active) return
+        setGroup((groupRow.data as ProgramGroup | null) ?? null)
+        // The policy only returns this person's own row, so finding one is
+        // the same question as "do I administer this group".
+        setGroupAdmin(Boolean(adminRow.data))
+      } else if (active) {
+        setGroup(null)
+        setGroupAdmin(false)
+      }
+
       // The switcher's list. Separate from the rest because a failure here
       // costs the menu, not the screen: an empty list simply renders the
       // program name the way it looked before there was a switcher.
@@ -83,7 +112,21 @@ export default function AppShell() {
       }
       if (!active) return
 
-      if (programResult.error) setError(programResult.error.message)
+      if (programResult.error) {
+        // A program the policies do not return is not an error the person
+        // caused, and "cannot coerce the result to a single JSON object" is
+        // not a sentence to show anybody. PGRST116 is PostgREST saying the
+        // filtered set was empty, which here means "not yours" -- a typed id,
+        // a stale link, or a division in somebody else's group.
+        const missing =
+          programResult.error.code === 'PGRST116' ||
+          programResult.error.message.includes('coerce the result')
+        setError(
+          missing
+            ? 'That team is not one of yours. Your coaches and families only see the teams they are on.'
+            : programResult.error.message,
+        )
+      }
       else {
         setProgram(programResult.data)
         // Recorded only once the program actually loaded, so a mistyped or
@@ -124,13 +167,33 @@ export default function AppShell() {
         >
           {error || 'Program not found.'}
         </span>
+        {/* Otherwise this screen is a cul-de-sac: the shell never rendered, so
+            there is no wordmark and no navigation to leave by. */}
+        <Link
+          to="/"
+          className="mt-6 inline-block font-body text-sm text-accent underline underline-offset-4"
+        >
+          Back to your team
+        </Link>
       </Centered>
     )
   }
 
   return (
     <ProgramContext
-      value={{ program, role, memberId, userId, features, orgLeader, unreadCount: unread, refreshUnread }}
+      value={{
+        program,
+        role,
+        memberId,
+        userId,
+        features,
+        orgLeader,
+        groupAdmin,
+        group,
+        staff: isStaff(role) || orgLeader || groupAdmin,
+        unreadCount: unread,
+        refreshUnread,
+      }}
     >
       <div className="min-h-svh lg:flex">
         {/* ---- Sidebar, desktop only ---- */}
@@ -155,8 +218,19 @@ export default function AppShell() {
             </Link>
           )}
 
+          {/* The way up for a Program Admin. Not shown to a director, who has
+              the wider view above and would only be offered a narrower one. */}
+          {groupAdmin && group && !orgLeader && (
+            <Link
+              to={`/group/${group.id}`}
+              className="border-b border-border px-6 py-3 font-body text-xs uppercase tracking-wider text-muted transition hover:bg-accent/5 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
+            >
+              ← All of {group.name}
+            </Link>
+          )}
+
           <nav className="flex flex-1 flex-col gap-1 px-3 py-4">
-            {visibleNav(features, isStaff(role) || orgLeader).map(({ to, label, Icon }) => (
+            {visibleNav(features, isStaff(role) || orgLeader || groupAdmin).map(({ to, label, Icon }) => (
               <NavLink key={to} to={to} className={sidebarLink}>
                 <IconWithBadge Icon={Icon} show={to === 'roster' && unread > 0} />
                 <span>{label}</span>
@@ -187,13 +261,23 @@ export default function AppShell() {
           <header className="border-b border-border px-6 py-4 lg:hidden">
             <div className="flex items-center justify-between gap-4">
               <Wordmark size="sm" />
-              {orgLeader && (
+              {orgLeader ? (
                 <Link
                   to={`/org/${program.organization_id}`}
                   className="font-body text-[0.7rem] uppercase tracking-wider text-muted transition hover:text-accent"
                 >
                   Overview
                 </Link>
+              ) : (
+                groupAdmin &&
+                group && (
+                  <Link
+                    to={`/group/${group.id}`}
+                    className="font-body text-[0.7rem] uppercase tracking-wider text-muted transition hover:text-accent"
+                  >
+                    All {group.name}
+                  </Link>
+                )
               )}
             </div>
             <div className="mt-3 flex items-start justify-between gap-4">
@@ -236,10 +320,10 @@ export default function AppShell() {
         <nav
           className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
           style={{
-            gridTemplateColumns: `repeat(${visibleNav(features, isStaff(role) || orgLeader).length}, minmax(0, 1fr))`,
+            gridTemplateColumns: `repeat(${visibleNav(features, isStaff(role) || orgLeader || groupAdmin).length}, minmax(0, 1fr))`,
           }}
         >
-          {visibleNav(features, isStaff(role) || orgLeader).map(({ to, short, Icon }) => (
+          {visibleNav(features, isStaff(role) || orgLeader || groupAdmin).map(({ to, short, Icon }) => (
             <NavLink key={to} to={to} className={tabLink}>
               <IconWithBadge Icon={Icon} show={to === 'roster' && unread > 0} />
               <span className="whitespace-nowrap text-[0.65rem] font-medium uppercase tracking-wider">{short}</span>
@@ -298,7 +382,7 @@ function tabLink({ isActive }: { isActive: boolean }) {
 
 function Centered({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-svh items-center justify-center px-6 font-body text-muted">
+    <main className="flex min-h-svh flex-col items-center justify-center px-6 text-center font-body text-muted">
       {children}
     </main>
   )

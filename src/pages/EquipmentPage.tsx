@@ -4,7 +4,7 @@ import { MemberPicker } from '../components/MemberPicker'
 import { Button, EmptyState, ErrorNote } from '../components/ui'
 import { EquipmentIcon, RosterIcon } from '../components/navItems'
 import { useProgram } from '../lib/programContext'
-import { ROLE_LABEL, isStaff, type Member } from '../lib/roster'
+import {ROLE_LABEL, type Member} from '../lib/roster'
 import {
   EMPTY_ITEM,
   availableCount,
@@ -23,8 +23,7 @@ import {
 } from '../lib/equipment'
 
 export default function EquipmentPage() {
-  const { program, role, memberId } = useProgram()
-  const staff = isStaff(role)
+  const { program, memberId, staff } = useProgram()
 
   const [items, setItems] = useState<EquipmentItem[]>([])
   const [checkouts, setCheckouts] = useState<Checkout[]>([])

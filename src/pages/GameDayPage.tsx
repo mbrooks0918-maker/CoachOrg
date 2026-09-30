@@ -4,7 +4,6 @@ import { Button, EmptyState, ErrorNote } from '../components/ui'
 import { GameDayIcon } from '../components/navItems'
 import { EventFields, type EventFormValues } from '../components/EventForm'
 import { useProgram } from '../lib/programContext'
-import { isStaff } from '../lib/roster'
 import {
   createEvent,
   defaultKickoff,
@@ -17,8 +16,7 @@ import {
 } from '../lib/gameday'
 
 export default function GameDayPage() {
-  const { program, role, memberId } = useProgram()
-  const staff = isStaff(role)
+  const { program, memberId, staff } = useProgram()
 
   const [events, setEvents] = useState<EventRow[]>([])
   const [mine, setMine] = useState<Volunteer[]>([])

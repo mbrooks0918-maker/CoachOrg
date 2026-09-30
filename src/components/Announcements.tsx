@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, EmptyState, ErrorNote, Field, TextArea } from './ui'
 import { RosterIcon } from './navItems'
 import { useProgram } from '../lib/programContext'
-import { isStaff, type Member } from '../lib/roster'
+import {type Member} from '../lib/roster'
 import {
   deleteAnnouncement,
   editAnnouncement,
@@ -33,8 +33,7 @@ export function Announcements({
   members: Member[]
   onUnreadChanged: () => Promise<void>
 }) {
-  const { program, role, userId, orgLeader } = useProgram()
-  const staff = isStaff(role)
+  const { program, userId, orgLeader, staff } = useProgram()
 
   const [items, setItems] = useState<Announcement[]>([])
   const [readIds, setReadIds] = useState<Set<string>>(new Set())

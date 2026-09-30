@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { visibleNav } from '../lib/navSections'
 import { useProgram } from '../lib/programContext'
-import { ROLE_LABEL, isStaff } from '../lib/roster'
+import {ROLE_LABEL} from '../lib/roster'
 import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/programHome'
 
 /**
@@ -14,8 +14,7 @@ import { loadHomeSummary, plural, shortDate, type HomeSummary } from '../lib/pro
  * role. No new views: every tile is a link to a screen that already exists.
  */
 export default function ProgramHome() {
-  const { program, role, memberId, features, orgLeader } = useProgram()
-  const staff = isStaff(role)
+  const { program, role, memberId, features, orgLeader, groupAdmin, group, staff } = useProgram()
 
   const [summary, setSummary] = useState<HomeSummary | null>(null)
 
@@ -113,7 +112,13 @@ export default function ProgramHome() {
   return (
     <div>
       <p className="font-body text-xs font-medium uppercase tracking-[0.3em] text-muted">
-        {role ? (ROLE_LABEL[role] ?? role) : 'Welcome'}
+        {role
+          ? (ROLE_LABEL[role] ?? role)
+          : orgLeader
+            ? 'Director'
+            : groupAdmin
+              ? 'Program Admin'
+              : 'Welcome'}
       </p>
       <h2 className="mt-3 font-display text-3xl font-bold uppercase tracking-tight text-ink sm:text-4xl">
         {summary?.displayName ? `Hi, ${summary.displayName.split(' ')[0]}` : program.name}
@@ -123,6 +128,28 @@ export default function ProgramHome() {
           ? 'Everything for this team, in one place.'
           : 'Your team, and what you need from it.'}
       </p>
+
+      {/* The way up for a Program Admin: one sport, every division of it.
+          Shown only when the director's wider card is not, so nobody is
+          offered two ways up at once. */}
+      {!orgLeader && groupAdmin && group && (
+        <Link
+          to={`/group/${group.id}`}
+          className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-border bg-surface p-5 transition hover:border-accent hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <span>
+            <span className="block font-body text-[0.65rem] font-medium uppercase tracking-[0.25em] text-muted">
+              Every division
+            </span>
+            <span className="mt-1 block font-display text-base font-semibold uppercase tracking-wide text-ink">
+              All of {group.name}
+            </span>
+          </span>
+          <span aria-hidden="true" className="font-mono text-accent">
+            →
+          </span>
+        </Link>
+      )}
 
       {/* The way up. Only for whoever runs the organization; a coach of every
           team in the park still does not see it. Lives here as well as in the

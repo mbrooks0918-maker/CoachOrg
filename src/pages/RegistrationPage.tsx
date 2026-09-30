@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, EmptyState, ErrorNote, Field } from '../components/ui'
 import { RegistrationIcon } from '../components/navItems'
 import { useProgram } from '../lib/programContext'
-import { isStaff } from '../lib/roster'
 import {
   addQuestion,
   bracketLabel,
@@ -27,8 +26,7 @@ import {
  * check the same thing, so a guessed URL finds nothing to act on.
  */
 export default function RegistrationPage() {
-  const { program, role } = useProgram()
-  const staff = isStaff(role)
+  const { program, staff } = useProgram()
 
   const [seasons, setSeasons] = useState<Season[]>([])
   const [selected, setSelected] = useState<string | null>(null)

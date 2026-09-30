@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, EmptyState, ErrorNote, Field, TextArea } from '../components/ui'
 import { ResourcesIcon } from '../components/navItems'
 import { useProgram } from '../lib/programContext'
-import { isStaff } from '../lib/roster'
 import {
   addResource,
   deleteCategory,
@@ -32,13 +31,12 @@ import {
  * poster and becomes a player on a click.
  */
 export default function ResourcesPage() {
-  const { program, role, orgLeader } = useProgram()
+  const { program, staff } = useProgram()
   const organizationId = program.organization_id
 
   // Staff, and org leaders too: an athletic director carries no role in any
   // single program, so isStaff() alone would lock them out of their own
   // organization's library.
-  const staff = isStaff(role) || orgLeader
 
   const [categories, setCategories] = useState<ResourceCategory[]>([])
   const [loading, setLoading] = useState(true)

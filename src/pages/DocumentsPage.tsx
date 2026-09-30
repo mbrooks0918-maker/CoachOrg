@@ -3,7 +3,6 @@ import { Button, EmptyState, ErrorNote, Field, TextArea } from '../components/ui
 import { DocumentsIcon } from '../components/navItems'
 import { FilePicker } from '../components/FilePicker'
 import { useProgram } from '../lib/programContext'
-import { isStaff } from '../lib/roster'
 import { formatSize, formatUploaded, openDocument } from '../lib/documentStorage'
 import {
   CATEGORIES,
@@ -15,8 +14,7 @@ import {
 } from '../lib/documents'
 
 export default function DocumentsPage() {
-  const { program, role } = useProgram()
-  const staff = isStaff(role)
+  const { program, staff } = useProgram()
 
   const [documents, setDocuments] = useState<ProgramDocument[]>([])
   const [loading, setLoading] = useState(true)

@@ -6,7 +6,7 @@ import { MemberPicker } from '../components/MemberPicker'
 import { BackLink } from '../components/BackLink'
 import { Button, ErrorNote } from '../components/ui'
 import { useProgram } from '../lib/programContext'
-import { ROLE_LABEL, isStaff, type Member } from '../lib/roster'
+import {ROLE_LABEL, type Member} from '../lib/roster'
 import {
   assignVolunteer,
   deleteEvent,
@@ -23,9 +23,8 @@ import {
 
 export default function EventDetailPage() {
   const { eventId } = useParams<{ eventId: string }>()
-  const { program, role, memberId, userId } = useProgram()
+  const { program, memberId, userId, staff } = useProgram()
   const navigate = useNavigate()
-  const staff = isStaff(role)
 
   const [event, setEvent] = useState<EventRow | null>(null)
   const [todo, setTodo] = useState<ListItem[]>([])

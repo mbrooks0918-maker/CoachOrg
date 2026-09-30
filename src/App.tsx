@@ -19,6 +19,7 @@ import RegistrationPage from './pages/RegistrationPage'
 import ResourcesPage from './pages/ResourcesPage'
 import RegisterPublic from './pages/RegisterPublic'
 import OrgOverview from './pages/OrgOverview'
+import ProgramGroupOverview from './pages/ProgramGroupOverview'
 import { BuildBadge } from './components/BuildBadge'
 
 /**
@@ -80,6 +81,18 @@ export default function App() {
         element={
           <RequireAuth>
             <OrgOverview />
+          </RequireAuth>
+        }
+      />
+      {/* Above a division, below the organization: one sport, every division
+          of it. Outside AppShell for the same reason the org overview is --
+          the shell is scoped to a single program and this deliberately is
+          not. */}
+      <Route
+        path="/group/:groupId"
+        element={
+          <RequireAuth>
+            <ProgramGroupOverview />
           </RequireAuth>
         }
       />

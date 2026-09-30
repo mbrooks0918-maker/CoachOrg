@@ -1,7 +1,17 @@
 import { createContext, use } from 'react'
 import type { Feature } from './features'
 
-export type Program = { id: string; name: string; sport: string; organization_id: string }
+export type Program = {
+  id: string
+  name: string
+  sport: string
+  organization_id: string
+  /** The sport-wide group this division belongs to, if any. Usually null. */
+  program_group_id: string | null
+}
+
+/** The group a Program Admin runs: one sport, every division in it. */
+export type ProgramGroup = { id: string; name: string }
 
 export type ProgramContextValue = {
   program: Program
@@ -19,6 +29,24 @@ export type ProgramContextValue = {
    * is still not the person the organization-level view is for.
    */
   orgLeader: boolean
+  /**
+   * Program Admin of the group this division belongs to: a sport, across
+   * every age division of it. Below an org leader, above a coach.
+   */
+  groupAdmin: boolean
+  /** The group this division belongs to, when it is in one. */
+  group: ProgramGroup | null
+  /**
+   * May this person run this program?
+   *
+   * Computed once here rather than in each screen, because the answer has
+   * three sources and only one of them is a membership row: a coach holds a
+   * staff role, a director holds the organization, and a Program Admin holds
+   * the group. Asking isStaff(role) alone -- which every page used to do --
+   * hands the parent's view to both of the people who have no role in this
+   * particular team.
+   */
+  staff: boolean
   /** Announcements in this program the viewer has not seen. */
   unreadCount: number
   /** Re-count after reading or deleting one, so the badge keeps up. */

@@ -14,28 +14,12 @@ import { Button, CodeTile, EmptyState, ErrorNote } from '../components/ui'
 import { RosterIcon } from '../components/navItems'
 import { CODE_TYPES } from '../lib/codes'
 import { supabase } from '../lib/supabaseClient'
-import {
-  ROLE_GROUPS,
-  ROLE_LABEL,
-  createClaimCode,
-  formatJoined,
-  indexLinks,
-  isStaff,
-  linkGuardian,
-  loadClaimCodes,
-  loadRoster,
-  revokeClaimCode,
-  unlinkGuardian,
-  type ClaimCode,
-  type GuardianLink,
-  type Member,
-} from '../lib/roster'
+import {ROLE_GROUPS, ROLE_LABEL, createClaimCode, formatJoined, indexLinks, linkGuardian, loadClaimCodes, loadRoster, revokeClaimCode, unlinkGuardian, type ClaimCode, type GuardianLink, type Member} from '../lib/roster'
 
 type Code = { id: string; code: string; code_type: string }
 
 export default function RosterPage() {
-  const { program, role, memberId, refreshUnread } = useProgram()
-  const staff = isStaff(role)
+  const { program, memberId, refreshUnread, staff } = useProgram()
 
   const [members, setMembers] = useState<Member[]>([])
   const [links, setLinks] = useState<GuardianLink[]>([])

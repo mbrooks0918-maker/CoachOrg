@@ -16,9 +16,14 @@ export type MyProgram = { id: string; name: string }
  * than ten, and numeric collation is what gets that right.
  */
 export async function listMyPrograms(userId: string): Promise<MyProgram[]> {
-  const [coached, member] = await Promise.all([
+  const [coached, member, grouped] = await Promise.all([
     supabase.from('programs').select('id, name').eq('head_coach_id', userId),
     supabase.from('program_members').select('programs(id, name)').eq('user_id', userId),
+    // A Program Admin holds neither a membership row nor a head coach column,
+    // so without this they belong to nothing and land on /create-org. The
+    // filter is only "is in some group": which groups they may actually read
+    // is the policy's decision, not this query's.
+    supabase.from('programs').select('id, name').not('program_group_id', 'is', null),
   ])
 
   const byId = new Map<string, MyProgram>()
@@ -28,6 +33,9 @@ export async function listMyPrograms(userId: string): Promise<MyProgram[]> {
   for (const row of member.data ?? []) {
     const program = row.programs as unknown as MyProgram | null
     if (program?.id) byId.set(program.id, { id: program.id, name: program.name })
+  }
+  for (const row of grouped.data ?? []) {
+    byId.set(row.id as string, { id: row.id as string, name: row.name as string })
   }
 
   return [...byId.values()].sort((a, b) =>
