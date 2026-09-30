@@ -8,6 +8,8 @@ import { unreadCount } from '../lib/announcements'
 import { rememberLastProgram } from '../lib/lastProgram'
 import { isOrgLeader } from '../lib/orgOverview'
 import { visibleNav } from '../lib/navSections'
+import { listMyPrograms, type MyProgram } from '../lib/program'
+import { ProgramSwitcher } from './ProgramSwitcher'
 import { isStaff } from '../lib/roster'
 
 /** Belongs to the shell rather than the section list -- it is not a section. */
@@ -39,6 +41,7 @@ export default function AppShell() {
   const [userId, setUserId] = useState<string | null>(null)
   const [features, setFeatures] = useState<Feature[]>([])
   const [orgLeader, setOrgLeader] = useState(false)
+  const [myPrograms, setMyPrograms] = useState<MyProgram[]>([])
   const [unread, setUnread] = useState(0)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -70,6 +73,14 @@ export default function AppShell() {
         loadProgramFeatures(programId),
         unreadCount(programId),
       ])
+
+      // The switcher's list. Separate from the rest because a failure here
+      // costs the menu, not the screen: an empty list simply renders the
+      // program name the way it looked before there was a switcher.
+      if (uid) {
+        const mine = await listMyPrograms(uid)
+        if (active) setMyPrograms(mine)
+      }
       if (!active) return
 
       if (programResult.error) setError(programResult.error.message)
@@ -127,17 +138,13 @@ export default function AppShell() {
           <div className="border-b border-border px-6 py-5">
             <Wordmark />
           </div>
-          <Link
-            to=""
-            className="block border-b border-border px-6 py-5 transition hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent"
-          >
-            <p className="font-display text-xl font-bold uppercase leading-tight tracking-tight text-ink">
-              {program.name}
-            </p>
-            <p className="mt-1 font-body text-xs uppercase tracking-wider text-muted">
-              {program.sport}
-            </p>
-          </Link>
+          <ProgramSwitcher
+            programs={myPrograms}
+            currentId={program.id}
+            name={program.name}
+            sport={program.sport}
+            variant="sidebar"
+          />
 
           {orgLeader && (
             <Link
@@ -190,14 +197,13 @@ export default function AppShell() {
               )}
             </div>
             <div className="mt-3 flex items-start justify-between gap-4">
-            <Link to="" className="min-w-0 focus-visible:outline-none">
-              <p className="font-body text-[0.65rem] font-medium uppercase tracking-[0.3em] text-muted">
-                {program.sport}
-              </p>
-              <h1 className="mt-1.5 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
-                {program.name}
-              </h1>
-            </Link>
+            <ProgramSwitcher
+              programs={myPrograms}
+              currentId={program.id}
+              name={program.name}
+              sport={program.sport}
+              variant="header"
+            />
             <button
               type="button"
               onClick={handleSignOut}
