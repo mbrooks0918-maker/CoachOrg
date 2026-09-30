@@ -57,7 +57,10 @@ export default function EquipmentPage() {
 
   // A player's copy of this data is already only their own gear, because the
   // policies filtered it on the way out.
-  if (!staff) return <MyEquipment items={items} checkouts={checkouts} memberId={memberId} />
+  if (!staff)
+    return (
+      <MyEquipment items={items} checkouts={checkouts} members={members} memberId={memberId} />
+    )
 
   const open = outstanding(checkouts)
 
@@ -152,47 +155,85 @@ export default function EquipmentPage() {
 function MyEquipment({
   items,
   checkouts,
+  members,
   memberId,
 }: {
   items: EquipmentItem[]
   checkouts: Checkout[]
+  members: Member[]
   memberId: string | null
 }) {
   const byId = new Map(items.map((i) => [i.id, i]))
-  const mine = outstanding(checkouts).filter((c) => c.member_id === memberId)
-  const returned = checkouts.filter((c) => c.member_id === memberId && c.returned_at !== null)
+  const nameOf = new Map(members.map((m) => [m.id, m.display_name]))
+
+  // Every row that comes back is either the viewer's own or one of their
+  // children's -- the policy on equipment_checkouts decides that, and there is
+  // deliberately no second filter here. A parent is the person who finds the
+  // flag belts in the boot of the car on Sunday night, so "what does my family
+  // still have" is the question this screen answers.
+  const out = outstanding(checkouts)
+  const returned = checkouts.filter((c) => c.returned_at !== null)
+
+  // Viewer first, then each child by name, so a parent reads their own row
+  // before being asked about anyone else's.
+  const holders = [...new Set(out.map((c) => c.member_id))].sort((a, b) => {
+    if (a === memberId) return -1
+    if (b === memberId) return 1
+    return (nameOf.get(a) ?? '').localeCompare(nameOf.get(b) ?? '')
+  })
+
+  const forSomeoneElse = out.some((c) => c.member_id !== memberId)
 
   return (
     <div>
       <h2 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
-        Your equipment
+        {forSomeoneElse ? "Your family's equipment" : 'Your equipment'}
       </h2>
       <p className="mt-2 font-body text-sm text-muted">
-        What the program has checked out to you. Your coach hands it out and takes it back.
+        {forSomeoneElse
+          ? 'What the program has checked out to you and your children. Your coach hands it out and takes it back.'
+          : 'What the program has checked out to you. Your coach hands it out and takes it back.'}
       </p>
 
-      {mine.length === 0 ? (
+      {out.length === 0 ? (
         <p className="mt-6 rounded-xl border border-border bg-surface px-4 py-6 text-center font-body text-sm text-muted">
-          You are not holding any team equipment.
+          Nothing is checked out right now. Anything a coach hands to you or your
+          child shows up here.
         </p>
       ) : (
-        <ul className="mt-6 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
-          {mine.map((c) => {
-            const item = byId.get(c.equipment_item_id)
-            return (
-              <li key={c.id} className="px-4 py-3.5">
-                <p className="font-body text-base font-medium text-ink">
-                  {item?.name ?? 'Equipment'}
-                  {c.quantity > 1 && <span className="text-muted"> × {c.quantity}</span>}
-                </p>
-                <p className="mt-1 font-mono text-[0.7rem] uppercase tracking-wider text-muted/70">
-                  {item?.category} · since {formatSince(c.checked_out_at)}
-                </p>
-                {c.notes && <p className="mt-1 font-body text-sm text-muted">{c.notes}</p>}
-              </li>
-            )
-          })}
-        </ul>
+        <div className="mt-6 space-y-6">
+          {holders.map((holder) => (
+            <section key={holder}>
+              {/* The name only earns a heading once there is more than one
+                  person to tell apart. A player holding their own kit does not
+                  need to be told whose it is. */}
+              {forSomeoneElse && (
+                <h3 className="mb-2 font-body text-xs font-medium uppercase tracking-[0.22em] text-muted">
+                  {holder === memberId ? 'You' : (nameOf.get(holder) ?? 'Your player')}
+                </h3>
+              )}
+              <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+                {out
+                  .filter((c) => c.member_id === holder)
+                  .map((c) => {
+                    const item = byId.get(c.equipment_item_id)
+                    return (
+                      <li key={c.id} className="px-4 py-3.5">
+                        <p className="font-body text-base font-medium text-ink">
+                          {item?.name ?? 'Equipment'}
+                          {c.quantity > 1 && <span className="text-muted"> × {c.quantity}</span>}
+                        </p>
+                        <p className="mt-1 font-mono text-[0.7rem] uppercase tracking-wider text-muted/70">
+                          {item?.category} · since {formatSince(c.checked_out_at)}
+                        </p>
+                        {c.notes && <p className="mt-1 font-body text-sm text-muted">{c.notes}</p>}
+                      </li>
+                    )
+                  })}
+              </ul>
+            </section>
+          ))}
+        </div>
       )}
 
       {returned.length > 0 && (
@@ -206,6 +247,9 @@ function MyEquipment({
               <li key={c.id} className="px-4 py-3">
                 <p className="font-body text-sm text-muted line-through">
                   {byId.get(c.equipment_item_id)?.name ?? 'Equipment'}
+                  {forSomeoneElse && c.member_id !== memberId && (
+                    <span className="no-underline"> · {nameOf.get(c.member_id) ?? 'Your player'}</span>
+                  )}
                 </p>
                 <p className="mt-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-muted/70">
                   Returned {c.returned_at && formatSince(c.returned_at)}

@@ -12,7 +12,13 @@ export type HomeSummary = {
   displayName: string | null
   memberCount: number
   upcomingTasks: number
-  /** Staff: items in the inventory. Everyone else: things they are holding. */
+  /**
+   * Staff: items in the inventory. Everyone else: what their household is
+   * holding. Deliberately not filtered by member here -- the policy on
+   * equipment_checkouts already returns the viewer's own rows plus their
+   * children's, so filtering to memberId would count a parent's own gear and
+   * miss the bag of balls actually sitting in their car.
+   */
   equipmentCount: number
   nextEvent: { id: string; name: string; starts_at: string } | null
   /** The viewer's volunteer jobs at that next event, if any. */
@@ -66,7 +72,6 @@ export async function loadHomeSummary(
             .from('equipment_checkouts')
             .select('id', { count: 'exact', head: true })
             .eq('program_id', programId)
-            .eq('member_id', memberId)
             .is('returned_at', null)
         : Promise.resolve({ count: 0 }),
 

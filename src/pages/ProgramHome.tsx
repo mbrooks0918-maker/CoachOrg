@@ -62,7 +62,7 @@ export default function ProgramHome() {
               ? `${plural(summary.equipmentCount, 'item', 'items')} tracked`
               : 'Nothing logged yet'
             : summary.equipmentCount > 0
-              ? `${plural(summary.equipmentCount, 'item', 'items')} checked out to you`
+              ? `${plural(summary.equipmentCount, 'item', 'items')} checked out`
               : 'Nothing checked out',
         }
 
